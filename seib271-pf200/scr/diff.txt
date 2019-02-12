@@ -1,0 +1,3668 @@
+Only in compared_code/seib_code271/code/: climate_pasoh(71-90).txt
+Only in compared_code/seib_code271/code/: co2_1750-2100_a1b.txt
+diff compared_code/seib_code271/code/etc.f90 seib271_pf200/scr/etc.f90
+86,89c86,101
+<    !update 20 year running mean
+<    if (doy == Day_in_Year) then	!on the end of year
+<       tmp_coldest_20yr_ave = sum( tmp_coldest_RunningRecord (1:min(20,year)) ) /min(20, year)
+<       tmp_hottest_20yr_ave = sum( tmp_hottest_RunningRecord (1:min(20,year)) ) /min(20, year)
+---
+> 
+> !ARAKIDA APPLIED BUG FIX (REFERRED TO SEIB-DGVM VER.2.82), AND ARAKIDA ADDED "real()"**************
+> !   !update 20 year running mean
+> !   if (doy == Day_in_Year) then	!on the end of year
+> !      tmp_coldest_20yr_ave = sum( tmp_coldest_RunningRecord (1:min(20,year)) ) /min(20, year)
+> !      tmp_hottest_20yr_ave = sum( tmp_hottest_RunningRecord (1:min(20,year)) ) /min(20, year)
+> !   end if
+> 
+>    if (doy == Day_in_Year) then !on the end of year
+>       if (Flag_spinup_read) then
+>           tmp_coldest_20yr_ave = sum( tmp_coldest_RunningRecord (1:20) ) / 20.0
+>           tmp_hottest_20yr_ave = sum( tmp_hottest_RunningRecord (1:20) ) / 20.0
+>       else
+>           tmp_coldest_20yr_ave = sum( tmp_coldest_RunningRecord (1:min(20, year)) ) / real(min(20, year))
+>           tmp_hottest_20yr_ave = sum( tmp_hottest_RunningRecord (1:min(20, year)) ) / real(min(20, year))
+>       endif
+90a103,104
+> 
+> !ARAKIDA APPLIED BUG FIX (REFERRED TO SEIB-DGVM VER.2.82), AND ARAKIDA ADDED "real()"**************
+107c121,130
+<       gdd_20yr_ave = sum( gdd_20yr_RunningRecord(1:min(20, year)) ) / min(20, year)
+---
+> 
+> !ARAKIDA APPLIED BUG FIX (REFERRED TO SEIB-DGVM VER.2.82), AND ARAKIDA ADDED "real()"**************
+> !      gdd_20yr_ave = sum( gdd_20yr_RunningRecord(1:min(20, year)) ) / min(20, year)
+>       if (Flag_spinup_read) then
+>          gdd_20yr_ave = sum( gdd_20yr_RunningRecord(1:20) ) / 20.0
+>       else
+>          gdd_20yr_ave = sum( gdd_20yr_RunningRecord(1:min(20, year)) ) / real(min(20, year))
+>       endif
+> !ARAKIDA APPLIED BUG FIX (REFERRED TO SEIB-DGVM VER.2.82), AND ARAKIDA ADDED "real()"**************
+> 
+487,488d509
+< 
+< 
+492c513
+< SUBROUTINE spinup_out (Fn)
+---
+> SUBROUTINE spinup_out (Fn) 
+498a520,522
+>    USE vegi_status_current2 !ARAKIDA ADDED FOR DA
+>    USE grid_status_current2 !ARAKIDA ADDED FOR DA
+>    USE spinin_data          !ARAKIDA ADDED FOR DA
+503c527
+<    
+---
+> 
+505,523c529,530
+<    integer           n ,i, j, k
+<    character(len=3)  string_pft, string_year, string_dived, string_divedG
+<    
+< !_____________ preparation for strings
+< i = int(  Day_in_Year       /100 ) ; string_year  (1:1)= char(i+48)
+< j = int( (Day_in_Year-i*100)/ 10 ) ; string_year  (2:2)= char(j+48)
+< k =    (  Day_in_Year-i*100-j*10 ) ; string_year  (3:3)= char(k+48)
+< 
+< i = int(  PFT_no            /100 ) ; string_pft   (1:1)= char(i+48)
+< j = int( (PFT_no     -i*100)/ 10 ) ; string_pft   (2:2)= char(j+48)
+< k = int(  PFT_no     -i*100-j*10 ) ; string_pft   (3:3)= char(k+48)
+< 
+< i = int(  Dived             /100 ) ; string_dived (1:1)= char(i+48)
+< j = int( (Dived      -i*100)/ 10 ) ; string_dived (2:2)= char(j+48)
+< k = int(  Dived      -i*100-j*10 ) ; string_dived (3:3)= char(k+48)
+< 
+< i = int(  DivedG            /100 ) ; string_divedG(1:1)= char(i+48)
+< j = int( (DivedG     -i*100)/ 10 ) ; string_divedG(2:2)= char(j+48)
+< k = int(  DivedG     -i*100-j*10 ) ; string_divedG(3:3)= char(k+48)
+---
+>    integer          n,i,j,k
+> !   character(len=3)  string_pft, string_year, string_dived, string_divedG !ARAKIDA DELETED FOR DA
+525,527c532
+< !_____________ Main part1 (variables of vegi_status_current1)
+< write (Fn,*) Spinup_year+Simulation_year  !Variable 'Spinup_year' for the continued simulation
+< write (Fn,*) tree_exist(:)                !This variable must be read at the beggining
+---
+> !ARAKIDA ADDED FOR DA ****************************************************************************
+529,575c534,539
+< write (Fn,'(i5)')       biome
+< write (Fn,'(f10.5,1x)') lai_max_wood
+< write (Fn,'(f10.5,1x)') lai_max_grass
+< write (Fn,'(f10.5,1x)') lai_mean_wood
+< write (Fn,'(f10.5,1x)') lai_mean_grass
+< 
+< write (Fn,*)                             phenology      (:)
+< write (Fn,*)                             pft_exist      (:)
+< write (Fn,'('//string_pft//'(i7  ,1x))') dfl_leaf_onset (:)
+< write (Fn,'('//string_pft//'(i7  ,1x))') dfl_leaf_shed  (:)
+< write (Fn,'('//string_pft//'(f7.3,1x))') stat_water     (:)
+< 
+< Do n=1, Max_no
+< if (tree_exist(n)) then
+<    write (Fn,'(6(i5,1x) )'  ) pft(n), age(n), height(n), bole(n), height_limit(n), flag_suppress(n)
+<    write (Fn,'(4(f10.5,1x))') dbh_heartwood(n), dbh_sapwood(n), crown_diameter(n), crown_area(n)
+<    write (Fn,'(5(f10.5,1x))') bole_x(n), bole_y(n), crown_x(n), crown_y(n), radius_limit(n)
+<    write (Fn,'(6(f12.2,1x))') la(n), mass_leaf(n), mass_trunk(n), mass_root(n), mass_stock(n), mass_available(n)
+<    write (Fn,'(f12.3,1x, f10.5,1x, f10.8)') mort_regu1(n), mort_regu2(n), mort_regu4(n)
+<    write (Fn,'(11(f10.5,1x))') stat_leaf_crowntop(n), stat_leaf_crownbottom(n,:)
+< endif
+< End do
+< 
+< Do i=1, DivedG
+<    write (Fn,'('//string_divedG//'(f12.3,1x))') gmass_leaf      (i,:)
+<    write (Fn,'('//string_divedG//'(f12.3,1x))') gmass_root      (i,:)
+<    write (Fn,'('//string_divedG//'(f12.3,1x))') gmass_available (i,:)
+<    write (Fn,'('//string_divedG//'(f12.3,1x))') gmass_stock     (i,:)
+<    write (Fn,'('//string_divedG//'(f12.3,1x))') lai_grass       (i,:)
+< End do
+< 
+< Do i=1, DivedG
+< Do j=1, DivedG
+<    write (Fn,'(20(f5.2,1x))')  lai_opt_grass_RunningRecord(:,i,j)
+< End do
+< End do
+< 
+< Do i=1, Day_in_Year
+<    write (Fn, *)                             phenology_RunningRecord (i,:)
+<    write (Fn,'('//string_pft//'(f10.1,1x))') npp_RunningRecord       (i,:)
+<    write (Fn,'('//string_pft//'(f10.1,1x))') gpp_RunningRecord       (i,:)
+<    write (Fn,'('//string_pft//'(f7.3,1x))' ) stat_water_RunningRecord(i,:)
+< End do
+< 
+< Do i=1, 20
+<    write (Fn,'('//string_pft//'(f10.3,1x))') mass_sum_RunningRecord(i,:)
+< End do
+---
+> !_____________ Counter
+> write(Fn) doy
+> write(Fn) year
+> write(Fn) year_climate
+> write(Fn) counter
+> write(Fn) randomnumber
+576a541,689
+> !_____________ Main part1 (variables of vegi_status_current1)
+> write(Fn) biome
+> write(Fn) lai_max
+> write(Fn) lai_max_wood
+> write(Fn) lai_max_grass
+> write(Fn) lai_mean_wood
+> write(Fn) lai_mean_grass
+> write(Fn) phenology
+> write(Fn) pft_exist
+> write(Fn) dfl_leaf_onset
+> write(Fn) dfl_leaf_shed
+> write(Fn) stat_water
+> write(Fn) tree_exist
+> write(Fn) pft
+> write(Fn) age
+> write(Fn) height
+> write(Fn) bole
+> write(Fn) height_limit
+> write(Fn) flag_suppress
+> write(Fn) dbh_heartwood
+> write(Fn) dbh_sapwood
+> write(Fn) crown_diameter
+> write(Fn) crown_area
+> write(Fn) bole_x
+> write(Fn) bole_y
+> write(Fn) crown_x
+> write(Fn) crown_y
+> write(Fn) radius_limit
+> write(Fn) la
+> write(Fn) mass_leaf
+> write(Fn) mass_trunk
+> write(Fn) mass_root
+> write(Fn) mass_stock
+> write(Fn) mass_available
+> write(Fn) mort_regu1
+> write(Fn) mort_regu2
+> write(Fn) mort_regu4
+> write(Fn) stat_leaf_crowntop
+> write(Fn) stat_leaf_crownbottom
+> write(Fn) gmass_leaf
+> write(Fn) gmass_root
+> write(Fn) gmass_available
+> write(Fn) gmass_stock
+> write(Fn) lai_grass
+> write(Fn) lai_opt_grass_RunningRecord
+> write(Fn) phenology_RunningRecord
+> write(Fn) npp_RunningRecord
+> write(Fn) gpp_RunningRecord
+> write(Fn) stat_water_RunningRecord
+> write(Fn) mass_sum_RunningRecord
+> 
+> !_____________ Main part1 (variables of vegi_status_current2)
+> write(Fn) C3g_no
+> write(Fn) C4g_no
+> write(Fn) canopy_cond
+> write(Fn) eK
+> write(Fn) lue
+> write(Fn) co2cmp
+> write(Fn) psat
+> write(Fn) stat_leaf_crownbottom_daily
+> write(Fn) lue_grass
+> write(Fn) co2cmp_grass
+> write(Fn) psat_grass
+> write(Fn) gpp
+> write(Fn) npp
+> write(Fn) gpp_daily_ind
+> write(Fn) resp_trunk
+> write(Fn) resp_leaf
+> write(Fn) resp_root
+> write(Fn) resp_grass_ag
+> write(Fn) resp_grass_bg
+> write(Fn) flux_litter_trunk
+> write(Fn) flux_litter_leaf
+> write(Fn) flux_litter_root
+> write(Fn) flux_litter_ag
+> write(Fn) flux_litter_bg
+> write(Fn) patch_vacant
+> 
+> !_____________ Main part2 (variables of grid_status_current1)
+> 
+> write(Fn) dfl_fire
+> write(Fn) fire_number
+> write(Fn) tmp_coldest_20yr_ave
+> write(Fn) tmp_hottest_20yr_ave
+> write(Fn) gdd_20yr_ave
+> write(Fn) pool_litter_trunk
+> write(Fn) pool_litter_leaf
+> write(Fn) pool_litter_root
+> write(Fn) pool_litter_ag
+> write(Fn) pool_litter_bg
+> write(Fn) pool_som_int
+> write(Fn) pool_som_slow
+> write(Fn) pool_fuel_standT
+> write(Fn) pool_fuel_standG
+> write(Fn) pool_w
+> write(Fn) pool_snow
+> write(Fn) gdd_20yr_RunningRecord
+> write(Fn) tmp_coldest_RunningRecord
+> write(Fn) tmp_hottest_RunningRecord
+> write(Fn) tmp_ave_GrassGrowth_RR
+> write(Fn) pool_c_RR
+> write(Fn) flux_c_uptake_RR
+> write(Fn) flux_c_mnt_RR
+> write(Fn) flux_c_gro_RR
+> write(Fn) flux_c_htr_RR
+> write(Fn) flux_c_fir_RR
+> write(Fn) flux_ro_RunningRecord
+> write(Fn) flux_ic_RunningRecord
+> write(Fn) flux_ev_RunningRecord
+> write(Fn) flux_tr_RunningRecord
+> write(Fn) tmp_air_RunningRecord
+> write(Fn) tmp_soil_RunningRecord
+> write(Fn) prec_RunningRecord
+> write(Fn) ev_pot_RunningRecord
+> write(Fn) par_RunningRecord
+> write(Fn) pool_w1_RunningRecord
+> 
+> !_____________ Main part2 (variables of grid_status_current2)
+> 
+> write(Fn) co2atm
+> write(Fn) ap
+> write(Fn) vp
+> write(Fn) vpd
+> write(Fn) dnsa
+> write(Fn) vp_sat
+> write(Fn) slope_vps
+> write(Fn) sl_hgt
+> write(Fn) dlen
+> write(Fn) rad
+> write(Fn) par
+> write(Fn) par_direct
+> write(Fn) par_diffuse
+> write(Fn) albedo_soil
+> write(Fn) albedo_veg
+> write(Fn) radnet_soil
+> write(Fn) radnet_veg
+> write(Fn) ir_tree
+> write(Fn) ir_grass
+> write(Fn) bowen_ratio
+> write(Fn) gdd0
+> write(Fn) gdd5
+> write(Fn) par_direct_rel
+> write(Fn) par_diffuse_rel
+> write(Fn) par_floor_rel
+> write(Fn) par_grass_rel
+> write(Fn) sum_par_floor
+> write(Fn) frac_crown_coverage
+> 
+> !ARAKIDA ADDED FOR DA ****************************************************************************
+577a691,761
+> !ARAKIDA DELETED FOR DA ************************************************************************** 
+> !_____________ preparation for strings
+> !i = int(  Day_in_Year       /100 ) ; string_year  (1:1)= char(i+48)
+> !j = int( (Day_in_Year-i*100)/ 10 ) ; string_year  (2:2)= char(j+48)
+> !k =    (  Day_in_Year-i*100-j*10 ) ; string_year  (3:3)= char(k+48)
+> !
+> !i = int(  PFT_no            /100 ) ; string_pft   (1:1)= char(i+48)
+> !j = int( (PFT_no     -i*100)/ 10 ) ; string_pft   (2:2)= char(j+48)
+> !k = int(  PFT_no     -i*100-j*10 ) ; string_pft   (3:3)= char(k+48)
+> !
+> !i = int(  Dived             /100 ) ; string_dived (1:1)= char(i+48)
+> !j = int( (Dived      -i*100)/ 10 ) ; string_dived (2:2)= char(j+48)
+> !k = int(  Dived      -i*100-j*10 ) ; string_dived (3:3)= char(k+48)
+> !
+> !i = int(  DivedG            /100 ) ; string_divedG(1:1)= char(i+48)
+> !j = int( (DivedG     -i*100)/ 10 ) ; string_divedG(2:2)= char(j+48)
+> !k = int(  DivedG     -i*100-j*10 ) ; string_divedG(3:3)= char(k+48)
+> !
+> !_____________ Main part1 (variables of vegi_status_current1)
+> !write (Fn,*) Spinup_year+Simulation_year  !Variable 'Spinup_year' for the continued simulation
+> !write (Fn,*) tree_exist(:)                !This variable must be read at the beggining
+> !
+> !write (Fn,'(i5)')       biome
+> !write (Fn,'(f10.5,1x)') lai_max_wood
+> !write (Fn,'(f10.5,1x)') lai_max_grass
+> !write (Fn,'(f10.5,1x)') lai_mean_wood
+> !write (Fn,'(f10.5,1x)') lai_mean_grass
+> !
+> !write (Fn,*)                             phenology      (:)
+> !write (Fn,*)                             pft_exist      (:)
+> !write (Fn,'('//string_pft//'(i7  ,1x))') dfl_leaf_onset (:)
+> !write (Fn,'('//string_pft//'(i7  ,1x))') dfl_leaf_shed  (:)
+> !write (Fn,'('//string_pft//'(f7.3,1x))') stat_water     (:)
+> !
+> !Do n=1, Max_no
+> !if (tree_exist(n)) then
+> !   write (Fn,'(6(i5,1x) )'  ) pft(n), age(n), height(n), bole(n), height_limit(n), flag_suppress(n)
+> !   write (Fn,'(4(f10.5,1x))') dbh_heartwood(n), dbh_sapwood(n), crown_diameter(n), crown_area(n)
+> !   write (Fn,'(5(f10.5,1x))') bole_x(n), bole_y(n), crown_x(n), crown_y(n), radius_limit(n)
+> !   write (Fn,'(6(f12.2,1x))') la(n), mass_leaf(n), mass_trunk(n), mass_root(n), mass_stock(n), mass_available(n)
+> !   write (Fn,'(f12.3,1x, f10.5,1x, f10.8)') mort_regu1(n), mort_regu2(n), mort_regu4(n)
+> !   write (Fn,'(11(f10.5,1x))') stat_leaf_crowntop(n), stat_leaf_crownbottom(n,:)
+> !endif
+> !End do
+> !
+> !Do i=1, DivedG
+> !   write (Fn,'('//string_divedG//'(f12.3,1x))') gmass_leaf      (i,:)
+> !   write (Fn,'('//string_divedG//'(f12.3,1x))') gmass_root      (i,:)
+> !   write (Fn,'('//string_divedG//'(f12.3,1x))') gmass_available (i,:)
+> !   write (Fn,'('//string_divedG//'(f12.3,1x))') gmass_stock     (i,:)
+> !   write (Fn,'('//string_divedG//'(f12.3,1x))') lai_grass       (i,:)
+> !End do
+> !
+> !Do i=1, DivedG
+> !Do j=1, DivedG
+> !   write (Fn,'(20(f5.2,1x))')  lai_opt_grass_RunningRecord(:,i,j)
+> !End do
+> !End do
+> !
+> !Do i=1, Day_in_Year
+> !   write (Fn, *)                             phenology_RunningRecord (i,:)
+> !   write (Fn,'('//string_pft//'(f10.1,1x))') npp_RunningRecord       (i,:)
+> !   write (Fn,'('//string_pft//'(f10.1,1x))') gpp_RunningRecord       (i,:)
+> !   write (Fn,'('//string_pft//'(f7.3,1x))' ) stat_water_RunningRecord(i,:)
+> !End do
+> !
+> !Do i=1, 20
+> !   write (Fn,'('//string_pft//'(f10.3,1x))') mass_sum_RunningRecord(i,:)
+> !End do
+> !
+> !
+579,612c763,798
+< write (Fn,'(2(i7,1x))'    ) dfl_fire, fire_number
+< write (Fn,'(3(f10.5,1x))' ) tmp_coldest_20yr_ave, tmp_hottest_20yr_ave, gdd_20yr_ave
+< write (Fn,'(3(f17.1,1x))' ) pool_litter_trunk, pool_litter_leaf, pool_litter_root
+< write (Fn,'(4(f17.1,1x))' ) pool_litter_ag, pool_litter_bg, pool_som_int, pool_som_slow
+< write (Fn,'(2(f17.1,1x))' ) pool_fuel_standT, pool_fuel_standG
+< write (Fn,'(31(f10.2,1x))') pool_w(:), pool_snow
+< 
+< write (Fn,'( 20(f7.2,1x))') gdd_20yr_RunningRecord    (:)
+< write (Fn,'( 20(f6.2,1x))') tmp_coldest_RunningRecord (:)
+< write (Fn,'( 20(f6.2,1x))') tmp_hottest_RunningRecord (:)
+< write (Fn,'( 20(f6.2,1x))') tmp_ave_GrassGrowth_RR    (:)
+< 
+< !write (Fn,'('//string_year//'(f15.1,1x))') c_emission_RunningRecord(:)
+< !write (Fn,'('//string_year//'(f15.1,1x))') c_uptake_RunningRecord  (:)
+< 
+< write (Fn,'('//string_year//'(f15.5,1x))') pool_c_RR (:)
+< 
+< write (Fn,'('//string_year//'(f15.1,1x))') flux_c_uptake_RR (:)
+< write (Fn,'('//string_year//'(f15.1,1x))') flux_c_mnt_RR    (:)
+< write (Fn,'('//string_year//'(f15.1,1x))') flux_c_gro_RR    (:)
+< write (Fn,'('//string_year//'(f15.1,1x))') flux_c_htr_RR    (:)
+< write (Fn,'('//string_year//'(f15.1,1x))') flux_c_fir_RR    (:)
+< 
+< write (Fn,'('//string_year//'(f10.5,1x))') flux_ro_RunningRecord(:)
+< write (Fn,'('//string_year//'(f10.5,1x))') flux_ic_RunningRecord(:)
+< write (Fn,'('//string_year//'(f10.5,1x))') flux_ev_RunningRecord(:)
+< write (Fn,'('//string_year//'(f10.5,1x))') flux_tr_RunningRecord(:)
+< 
+< write (Fn,'('//string_year//'(f6.2,1x))') tmp_air_RunningRecord (:)
+< write (Fn,'('//string_year//'(f6.2,1x))') tmp_soil_RunningRecord(:)
+< write (Fn,'('//string_year//'(f6.2,1x))') prec_RunningRecord    (:)
+< write (Fn,'('//string_year//'(f6.2,1x))') ev_pot_RunningRecord  (:)
+< write (Fn,'('//string_year//'(f6.1,1x))') par_RunningRecord     (:)
+< write (Fn,'('//string_year//'(f6.1,1x))') pool_w1_RunningRecord (:)
+---
+> !write (Fn,'(2(i7,1x))'    ) dfl_fire, fire_number
+> !write (Fn,'(3(f10.5,1x))' ) tmp_coldest_20yr_ave, tmp_hottest_20yr_ave, gdd_20yr_ave
+> !write (Fn,'(3(f17.1,1x))' ) pool_litter_trunk, pool_litter_leaf, pool_litter_root
+> !write (Fn,'(4(f17.1,1x))' ) pool_litter_ag, pool_litter_bg, pool_som_int, pool_som_slow
+> !write (Fn,'(2(f17.1,1x))' ) pool_fuel_standT, pool_fuel_standG
+> !write (Fn,'(31(f10.2,1x))') pool_w(:), pool_snow
+> !
+> !write (Fn,'( 20(f7.2,1x))') gdd_20yr_RunningRecord    (:)
+> !write (Fn,'( 20(f6.2,1x))') tmp_coldest_RunningRecord (:)
+> !write (Fn,'( 20(f6.2,1x))') tmp_hottest_RunningRecord (:)
+> !write (Fn,'( 20(f6.2,1x))') tmp_ave_GrassGrowth_RR    (:)
+> !
+> !!write (Fn,'('//string_year//'(f15.1,1x))') c_emission_RunningRecord(:)
+> !!write (Fn,'('//string_year//'(f15.1,1x))') c_uptake_RunningRecord  (:)
+> !
+> !write (Fn,'('//string_year//'(f15.5,1x))') pool_c_RR (:)
+> !
+> !write (Fn,'('//string_year//'(f15.1,1x))') flux_c_uptake_RR (:)
+> !write (Fn,'('//string_year//'(f15.1,1x))') flux_c_mnt_RR    (:)
+> !write (Fn,'('//string_year//'(f15.1,1x))') flux_c_gro_RR    (:)
+> !write (Fn,'('//string_year//'(f15.1,1x))') flux_c_htr_RR    (:)
+> !write (Fn,'('//string_year//'(f15.1,1x))') flux_c_fir_RR    (:)
+> !
+> !write (Fn,'('//string_year//'(f10.5,1x))') flux_ro_RunningRecord(:)
+> !write (Fn,'('//string_year//'(f10.5,1x))') flux_ic_RunningRecord(:)
+> !write (Fn,'('//string_year//'(f10.5,1x))') flux_ev_RunningRecord(:)
+> !write (Fn,'('//string_year//'(f10.5,1x))') flux_tr_RunningRecord(:)
+> !
+> !write (Fn,'('//string_year//'(f6.2,1x))') tmp_air_RunningRecord (:)
+> !write (Fn,'('//string_year//'(f6.2,1x))') tmp_soil_RunningRecord(:)
+> !write (Fn,'('//string_year//'(f6.2,1x))') prec_RunningRecord    (:)
+> !write (Fn,'('//string_year//'(f6.2,1x))') ev_pot_RunningRecord  (:)
+> !write (Fn,'('//string_year//'(f6.1,1x))') par_RunningRecord     (:)
+> !write (Fn,'('//string_year//'(f6.1,1x))') pool_w1_RunningRecord (:)
+> 
+> !ARAKIDA DELETED FOR DA ************************************************************************** 
+621c807,808
+< SUBROUTINE spinup_in (Fn)
+---
+> !SUBROUTINE spinup_in (Fn)    
+> SUBROUTINE spinup_in (Fn, ptl)!ARAKIDA DELATED "Fn" FOR DA
+628a816,818
+>    USE spinin_data          !ARAKIDA ADDED FOR DA
+>    USE vegi_status_current2 !ARAKIDA ADDED FOR DA
+>    USE grid_status_current2 !ARAKIDA ADDED FOR DA
+632a823,1277
+>    integer,intent(IN)::ptl !particle number !ARAKIDA ADDED FOR DA   
+> !Local variables
+>    integer n ,i, j
+> 
+> 
+> !ARAKIDA ADDED FOR DA ****************************************************************************
+> 
+> !_____________ Counter
+> read(Fn) spin(ptl)%doy
+> read(Fn) spin(ptl)%year
+> read(Fn) spin(ptl)%year_climate
+> read(Fn) spin(ptl)%counter
+> read(Fn) spin(ptl)%randomnumber
+> 
+> !_____________ Main part1 (variables of vegi_status_current1)
+> read(Fn) spin(ptl)%biome
+> read(Fn) spin(ptl)%lai_max
+> read(Fn) spin(ptl)%lai_max_wood
+> read(Fn) spin(ptl)%lai_max_grass
+> read(Fn) spin(ptl)%lai_mean_wood
+> read(Fn) spin(ptl)%lai_mean_grass
+> read(Fn) spin(ptl)%phenology
+> read(Fn) spin(ptl)%pft_exist
+> read(Fn) spin(ptl)%dfl_leaf_onset
+> read(Fn) spin(ptl)%dfl_leaf_shed
+> read(Fn) spin(ptl)%stat_water
+> read(Fn) spin(ptl)%tree_exist
+> read(Fn) spin(ptl)%pft
+> read(Fn) spin(ptl)%age
+> read(Fn) spin(ptl)%height
+> read(Fn) spin(ptl)%bole
+> read(Fn) spin(ptl)%height_limit
+> read(Fn) spin(ptl)%flag_suppress
+> read(Fn) spin(ptl)%dbh_heartwood
+> read(Fn) spin(ptl)%dbh_sapwood
+> read(Fn) spin(ptl)%crown_diameter
+> read(Fn) spin(ptl)%crown_area
+> read(Fn) spin(ptl)%bole_x
+> read(Fn) spin(ptl)%bole_y
+> read(Fn) spin(ptl)%crown_x
+> read(Fn) spin(ptl)%crown_y
+> read(Fn) spin(ptl)%radius_limit
+> read(Fn) spin(ptl)%la
+> read(Fn) spin(ptl)%mass_leaf
+> read(Fn) spin(ptl)%mass_trunk
+> read(Fn) spin(ptl)%mass_root
+> read(Fn) spin(ptl)%mass_stock
+> read(Fn) spin(ptl)%mass_available
+> read(Fn) spin(ptl)%mort_regu1
+> read(Fn) spin(ptl)%mort_regu2
+> read(Fn) spin(ptl)%mort_regu4
+> read(Fn) spin(ptl)%stat_leaf_crowntop
+> read(Fn) spin(ptl)%stat_leaf_crownbottom
+> read(Fn) spin(ptl)%gmass_leaf
+> read(Fn) spin(ptl)%gmass_root
+> read(Fn) spin(ptl)%gmass_available
+> read(Fn) spin(ptl)%gmass_stock
+> read(Fn) spin(ptl)%lai_grass
+> read(Fn) spin(ptl)%lai_opt_grass_RunningRecord
+> read(Fn) spin(ptl)%phenology_RunningRecord
+> read(Fn) spin(ptl)%npp_RunningRecord
+> read(Fn) spin(ptl)%gpp_RunningRecord
+> read(Fn) spin(ptl)%stat_water_RunningRecord
+> read(Fn) spin(ptl)%mass_sum_RunningRecord
+> 
+> !_____________ Main part1 (variables of vegi_status_current2)
+> read(Fn) spin(ptl)%C3g_no
+> read(Fn) spin(ptl)%C4g_no
+> read(Fn) spin(ptl)%canopy_cond
+> read(Fn) spin(ptl)%eK
+> read(Fn) spin(ptl)%lue
+> read(Fn) spin(ptl)%co2cmp
+> read(Fn) spin(ptl)%psat
+> read(Fn) spin(ptl)%stat_leaf_crownbottom_daily
+> read(Fn) spin(ptl)%lue_grass
+> read(Fn) spin(ptl)%co2cmp_grass
+> read(Fn) spin(ptl)%psat_grass
+> read(Fn) spin(ptl)%gpp
+> read(Fn) spin(ptl)%npp
+> read(Fn) spin(ptl)%gpp_daily_ind
+> read(Fn) spin(ptl)%resp_trunk
+> read(Fn) spin(ptl)%resp_leaf
+> read(Fn) spin(ptl)%resp_root
+> read(Fn) spin(ptl)%resp_grass_ag
+> read(Fn) spin(ptl)%resp_grass_bg
+> read(Fn) spin(ptl)%flux_litter_trunk
+> read(Fn) spin(ptl)%flux_litter_leaf
+> read(Fn) spin(ptl)%flux_litter_root
+> read(Fn) spin(ptl)%flux_litter_ag
+> read(Fn) spin(ptl)%flux_litter_bg
+> read(Fn) spin(ptl)%patch_vacant
+> 
+> !_____________ Main part2 (variables of grid_status_current1)
+> 
+> read(Fn) spin(ptl)%dfl_fire
+> read(Fn) spin(ptl)%fire_number
+> read(Fn) spin(ptl)%tmp_coldest_20yr_ave
+> read(Fn) spin(ptl)%tmp_hottest_20yr_ave
+> read(Fn) spin(ptl)%gdd_20yr_ave
+> read(Fn) spin(ptl)%pool_litter_trunk
+> read(Fn) spin(ptl)%pool_litter_leaf
+> read(Fn) spin(ptl)%pool_litter_root
+> read(Fn) spin(ptl)%pool_litter_ag
+> read(Fn) spin(ptl)%pool_litter_bg
+> read(Fn) spin(ptl)%pool_som_int
+> read(Fn) spin(ptl)%pool_som_slow
+> read(Fn) spin(ptl)%pool_fuel_standT
+> read(Fn) spin(ptl)%pool_fuel_standG
+> read(Fn) spin(ptl)%pool_w
+> read(Fn) spin(ptl)%pool_snow
+> read(Fn) spin(ptl)%gdd_20yr_RunningRecord
+> read(Fn) spin(ptl)%tmp_coldest_RunningRecord
+> read(Fn) spin(ptl)%tmp_hottest_RunningRecord
+> read(Fn) spin(ptl)%tmp_ave_GrassGrowth_RR
+> read(Fn) spin(ptl)%pool_c_RR
+> read(Fn) spin(ptl)%flux_c_uptake_RR
+> read(Fn) spin(ptl)%flux_c_mnt_RR
+> read(Fn) spin(ptl)%flux_c_gro_RR
+> read(Fn) spin(ptl)%flux_c_htr_RR
+> read(Fn) spin(ptl)%flux_c_fir_RR
+> read(Fn) spin(ptl)%flux_ro_RunningRecord
+> read(Fn) spin(ptl)%flux_ic_RunningRecord
+> read(Fn) spin(ptl)%flux_ev_RunningRecord
+> read(Fn) spin(ptl)%flux_tr_RunningRecord
+> read(Fn) spin(ptl)%tmp_air_RunningRecord
+> read(Fn) spin(ptl)%tmp_soil_RunningRecord
+> read(Fn) spin(ptl)%prec_RunningRecord
+> read(Fn) spin(ptl)%ev_pot_RunningRecord
+> read(Fn) spin(ptl)%par_RunningRecord
+> read(Fn) spin(ptl)%pool_w1_RunningRecord
+> 
+> !_____________ Main part2 (variables of grid_status_current2)
+> 
+> read(Fn) spin(ptl)%co2atm
+> read(Fn) spin(ptl)%ap
+> read(Fn) spin(ptl)%vp
+> read(Fn) spin(ptl)%vpd
+> read(Fn) spin(ptl)%dnsa
+> read(Fn) spin(ptl)%vp_sat
+> read(Fn) spin(ptl)%slope_vps
+> read(Fn) spin(ptl)%sl_hgt
+> read(Fn) spin(ptl)%dlen
+> read(Fn) spin(ptl)%rad
+> read(Fn) spin(ptl)%par
+> read(Fn) spin(ptl)%par_direct
+> read(Fn) spin(ptl)%par_diffuse
+> read(Fn) spin(ptl)%albedo_soil
+> read(Fn) spin(ptl)%albedo_veg
+> read(Fn) spin(ptl)%radnet_soil
+> read(Fn) spin(ptl)%radnet_veg
+> read(Fn) spin(ptl)%ir_tree
+> read(Fn) spin(ptl)%ir_grass
+> read(Fn) spin(ptl)%bowen_ratio
+> read(Fn) spin(ptl)%gdd0
+> read(Fn) spin(ptl)%gdd5
+> read(Fn) spin(ptl)%par_direct_rel
+> read(Fn) spin(ptl)%par_diffuse_rel
+> read(Fn) spin(ptl)%par_floor_rel
+> read(Fn) spin(ptl)%par_grass_rel
+> read(Fn) spin(ptl)%sum_par_floor
+> read(Fn) spin(ptl)%frac_crown_coverage
+> 
+> !ARAKIDA ADDED FOR DA ****************************************************************************
+> 
+> !ARAKIDA DELETED FOR DA **************************************************************************   
+> !!_____________ Main part1 (variables of vegi_status_current1)
+> !read (Fn,*) Spinup_year
+> !read (Fn,*) tree_exist(:)                !This variable must be read at the beggining
+> !
+> !read (Fn,*) biome
+> !read (Fn,*) lai_max_wood
+> !read (Fn,*) lai_max_grass
+> !read (Fn,*) lai_mean_wood
+> !read (Fn,*) lai_mean_grass
+> !
+> !read (Fn,*) phenology      (:)
+> !read (Fn,*) pft_exist      (:)
+> !read (Fn,*) dfl_leaf_onset (:)
+> !read (Fn,*) dfl_leaf_shed  (:)
+> !read (Fn,*) stat_water     (:)
+> !
+> !Do n=1, Max_no
+> !if (tree_exist(n)) then
+> !   read (Fn,*) pft(n), age(n), height(n), bole(n), height_limit(n), flag_suppress(n)
+> !   read (Fn,*) dbh_heartwood(n), dbh_sapwood(n), crown_diameter(n), crown_area(n)
+> !   read (Fn,*) bole_x(n), bole_y(n), crown_x(n), crown_y(n), radius_limit(n)
+> !   read (Fn,*) la(n), mass_leaf(n), mass_trunk(n), mass_root(n), mass_stock(n), mass_available(n)
+> !   read (Fn,*) mort_regu1(n), mort_regu2(n), mort_regu4(n)
+> !   read (Fn,*) stat_leaf_crowntop(n), stat_leaf_crownbottom(n,:)
+> !endif
+> !End do
+> !
+> !Do i=1, DivedG
+> !   read (Fn,*) gmass_leaf      (i,:)
+> !   read (Fn,*) gmass_root      (i,:)
+> !   read (Fn,*) gmass_available (i,:)
+> !   read (Fn,*) gmass_stock     (i,:)
+> !   read (Fn,*) lai_grass       (i,:)
+> !End do
+> !
+> !Do i=1, DivedG
+> !Do j=1, DivedG
+> !   read (Fn,*) lai_opt_grass_RunningRecord(:,i,j)
+> !End do
+> !End do
+> !
+> !Do i=1, Day_in_Year
+> !   read (Fn,*) phenology_RunningRecord (i,:)
+> !   read (Fn,*) npp_RunningRecord       (i,:)
+> !   read (Fn,*) gpp_RunningRecord       (i,:)
+> !   read (Fn,*) stat_water_RunningRecord(i,:)
+> !End do
+> !
+> !Do i=1, 20
+> !   read (Fn,*) mass_sum_RunningRecord(i,:)
+> !End do
+> !
+> !!_____________ Main part2 (variables of vegi_status_current2)
+> !read (Fn,*) dfl_fire, fire_number
+> !read (Fn,*) tmp_coldest_20yr_ave, tmp_hottest_20yr_ave, gdd_20yr_ave
+> !
+> !read (Fn,*) pool_litter_trunk, pool_litter_leaf, pool_litter_root
+> !read (Fn,*) pool_litter_ag, pool_litter_bg, pool_som_int, pool_som_slow
+> !read (Fn,*) pool_fuel_standT, pool_fuel_standG
+> !read (Fn,*) pool_w(:), pool_snow
+> !
+> !read (Fn,*) gdd_20yr_RunningRecord    (:)
+> !read (Fn,*) tmp_coldest_RunningRecord (:)
+> !read (Fn,*) tmp_hottest_RunningRecord (:)
+> !read (Fn,*) tmp_ave_GrassGrowth_RR    (:)
+> !
+> !!read (Fn,*) c_emission_RunningRecord(:)
+> !!read (Fn,*) c_uptake_RunningRecord  (:)
+> !
+> !read (Fn,*) pool_c_RR (:)
+> !
+> !read (Fn,*) flux_c_uptake_RR (:)
+> !read (Fn,*) flux_c_mnt_RR    (:)
+> !read (Fn,*) flux_c_gro_RR    (:)
+> !read (Fn,*) flux_c_htr_RR    (:)
+> !read (Fn,*) flux_c_fir_RR    (:)
+> !
+> !read (Fn,*) flux_ro_RunningRecord(:)
+> !read (Fn,*) flux_ic_RunningRecord(:)
+> !read (Fn,*) flux_ev_RunningRecord(:)
+> !read (Fn,*) flux_tr_RunningRecord(:)
+> !
+> !read (Fn,*) tmp_air_RunningRecord (:)
+> !read (Fn,*) tmp_soil_RunningRecord(:)
+> !read (Fn,*) prec_RunningRecord    (:)
+> !read (Fn,*) ev_pot_RunningRecord  (:)
+> !read (Fn,*) par_RunningRecord     (:)
+> !read (Fn,*) pool_w1_RunningRecord (:)
+> 
+> !ARAKIDA DELETED FOR DA **************************************************************************  
+> 
+> END SUBROUTINE spinup_in
+> 
+> !*************************************************************************************************
+> ! allocate spinup data !ARAKIDA ADDED THIS SUBROUTINE FOR DA
+> !*************************************************************************************************
+> SUBROUTINE spinup_in_allocate (ptl)
+> 
+> !_____________ Set variables
+> !Namespace
+>    USE spinin_data 
+>    USE data_structure
+>    USE time_counter
+>    USE vegi_status_current1
+>    USE grid_status_current1
+>    USE vegi_status_current2 
+>    USE grid_status_current2 
+>    implicit none
+>    
+> !Arguments
+>    integer,intent(IN)::ptl !particle number
+>    
+> !Local variables
+>    integer n ,i, j
+> 
+> !_____________ Counter
+>  doy=spin(ptl)%doy
+>  year=spin(ptl)%year
+>  year_climate=spin(ptl)%year_climate
+>  counter=spin(ptl)%counter
+>  randomnumber=spin(ptl)%randomnumber
+> 
+> !_____________ Main part1 (variables of vegi_status_current1)
+>  biome=spin(ptl)%biome
+>  lai_max=spin(ptl)%lai_max
+>  lai_max_wood=spin(ptl)%lai_max_wood
+>  lai_max_grass=spin(ptl)%lai_max_grass
+>  lai_mean_wood=spin(ptl)%lai_mean_wood
+>  lai_mean_grass=spin(ptl)%lai_mean_grass
+>  phenology=spin(ptl)%phenology
+>  pft_exist=spin(ptl)%pft_exist
+>  dfl_leaf_onset=spin(ptl)%dfl_leaf_onset
+>  dfl_leaf_shed=spin(ptl)%dfl_leaf_shed
+>  stat_water=spin(ptl)%stat_water
+>  tree_exist=spin(ptl)%tree_exist
+>  pft=spin(ptl)%pft
+>  age=spin(ptl)%age
+>  height=spin(ptl)%height
+>  bole=spin(ptl)%bole
+>  height_limit=spin(ptl)%height_limit
+>  flag_suppress=spin(ptl)%flag_suppress
+>  dbh_heartwood=spin(ptl)%dbh_heartwood
+>  dbh_sapwood=spin(ptl)%dbh_sapwood
+>  crown_diameter=spin(ptl)%crown_diameter
+>  crown_area=spin(ptl)%crown_area
+>  bole_x=spin(ptl)%bole_x
+>  bole_y=spin(ptl)%bole_y
+>  crown_x=spin(ptl)%crown_x
+>  crown_y=spin(ptl)%crown_y
+>  radius_limit=spin(ptl)%radius_limit
+>  la=spin(ptl)%la
+>  mass_leaf=spin(ptl)%mass_leaf
+>  mass_trunk=spin(ptl)%mass_trunk
+>  mass_root=spin(ptl)%mass_root
+>  mass_stock=spin(ptl)%mass_stock
+>  mass_available=spin(ptl)%mass_available
+>  mort_regu1=spin(ptl)%mort_regu1
+>  mort_regu2=spin(ptl)%mort_regu2
+>  mort_regu4=spin(ptl)%mort_regu4
+>  stat_leaf_crowntop=spin(ptl)%stat_leaf_crowntop
+>  stat_leaf_crownbottom=spin(ptl)%stat_leaf_crownbottom
+>  gmass_leaf=spin(ptl)%gmass_leaf
+>  gmass_root=spin(ptl)%gmass_root
+>  gmass_available=spin(ptl)%gmass_available
+>  gmass_stock=spin(ptl)%gmass_stock
+>  lai_grass=spin(ptl)%lai_grass
+>  lai_opt_grass_RunningRecord=spin(ptl)%lai_opt_grass_RunningRecord
+>  phenology_RunningRecord=spin(ptl)%phenology_RunningRecord
+>  npp_RunningRecord=spin(ptl)%npp_RunningRecord
+>  gpp_RunningRecord=spin(ptl)%gpp_RunningRecord
+>  stat_water_RunningRecord=spin(ptl)%stat_water_RunningRecord
+>  mass_sum_RunningRecord=spin(ptl)%mass_sum_RunningRecord
+> 
+> !_____________ Main part1 (variables of vegi_status_current2)
+>  C3g_no=spin(ptl)%C3g_no
+>  C4g_no=spin(ptl)%C4g_no
+>  canopy_cond=spin(ptl)%canopy_cond
+>  eK=spin(ptl)%eK
+>  lue=spin(ptl)%lue
+>  co2cmp=spin(ptl)%co2cmp
+>  psat=spin(ptl)%psat
+>  stat_leaf_crownbottom_daily=spin(ptl)%stat_leaf_crownbottom_daily
+>  lue_grass=spin(ptl)%lue_grass
+>  co2cmp_grass=spin(ptl)%co2cmp_grass
+>  psat_grass=spin(ptl)%psat_grass
+>  gpp=spin(ptl)%gpp
+>  npp=spin(ptl)%npp
+>  gpp_daily_ind=spin(ptl)%gpp_daily_ind
+>  resp_trunk=spin(ptl)%resp_trunk
+>  resp_leaf=spin(ptl)%resp_leaf
+>  resp_root=spin(ptl)%resp_root
+>  resp_grass_ag=spin(ptl)%resp_grass_ag
+>  resp_grass_bg=spin(ptl)%resp_grass_bg
+>  flux_litter_trunk=spin(ptl)%flux_litter_trunk
+>  flux_litter_leaf=spin(ptl)%flux_litter_leaf
+>  flux_litter_root=spin(ptl)%flux_litter_root
+>  flux_litter_ag=spin(ptl)%flux_litter_ag
+>  flux_litter_bg=spin(ptl)%flux_litter_bg
+>  patch_vacant=spin(ptl)%patch_vacant
+> 
+> !_____________ Main part2 (variables of grid_status_current1)
+> 
+>  dfl_fire=spin(ptl)%dfl_fire
+>  fire_number=spin(ptl)%fire_number
+>  tmp_coldest_20yr_ave=spin(ptl)%tmp_coldest_20yr_ave
+>  tmp_hottest_20yr_ave=spin(ptl)%tmp_hottest_20yr_ave
+>  gdd_20yr_ave=spin(ptl)%gdd_20yr_ave
+>  pool_litter_trunk=spin(ptl)%pool_litter_trunk
+>  pool_litter_leaf=spin(ptl)%pool_litter_leaf
+>  pool_litter_root=spin(ptl)%pool_litter_root
+>  pool_litter_ag=spin(ptl)%pool_litter_ag
+>  pool_litter_bg=spin(ptl)%pool_litter_bg
+>  pool_som_int=spin(ptl)%pool_som_int
+>  pool_som_slow=spin(ptl)%pool_som_slow
+>  pool_fuel_standT=spin(ptl)%pool_fuel_standT
+>  pool_fuel_standG=spin(ptl)%pool_fuel_standG
+>  pool_w=spin(ptl)%pool_w
+>  pool_snow=spin(ptl)%pool_snow
+>  gdd_20yr_RunningRecord=spin(ptl)%gdd_20yr_RunningRecord
+>  tmp_coldest_RunningRecord=spin(ptl)%tmp_coldest_RunningRecord
+>  tmp_hottest_RunningRecord=spin(ptl)%tmp_hottest_RunningRecord
+>  tmp_ave_GrassGrowth_RR=spin(ptl)%tmp_ave_GrassGrowth_RR
+>  pool_c_RR=spin(ptl)%pool_c_RR
+>  flux_c_uptake_RR=spin(ptl)%flux_c_uptake_RR
+>  flux_c_mnt_RR=spin(ptl)%flux_c_mnt_RR
+>  flux_c_gro_RR=spin(ptl)%flux_c_gro_RR
+>  flux_c_htr_RR=spin(ptl)%flux_c_htr_RR
+>  flux_c_fir_RR=spin(ptl)%flux_c_fir_RR
+>  flux_ro_RunningRecord=spin(ptl)%flux_ro_RunningRecord
+>  flux_ic_RunningRecord=spin(ptl)%flux_ic_RunningRecord
+>  flux_ev_RunningRecord=spin(ptl)%flux_ev_RunningRecord
+>  flux_tr_RunningRecord=spin(ptl)%flux_tr_RunningRecord
+>  tmp_air_RunningRecord=spin(ptl)%tmp_air_RunningRecord
+>  tmp_soil_RunningRecord=spin(ptl)%tmp_soil_RunningRecord
+>  prec_RunningRecord=spin(ptl)%prec_RunningRecord
+>  ev_pot_RunningRecord=spin(ptl)%ev_pot_RunningRecord
+>  par_RunningRecord=spin(ptl)%par_RunningRecord
+>  pool_w1_RunningRecord=spin(ptl)%pool_w1_RunningRecord 
+> 
+> !_____________ Main part2 (variables of grid_status_current2)
+> 
+>  co2atm=spin(ptl)%co2atm
+>  ap=spin(ptl)%ap
+>  vp=spin(ptl)%vp
+>  vpd=spin(ptl)%vpd
+>  dnsa=spin(ptl)%dnsa
+>  vp_sat=spin(ptl)%vp_sat
+>  slope_vps=spin(ptl)%slope_vps
+>  sl_hgt=spin(ptl)%sl_hgt
+>  dlen=spin(ptl)%dlen
+>  rad=spin(ptl)%rad
+>  par=spin(ptl)%par
+>  par_direct=spin(ptl)%par_direct
+>  par_diffuse=spin(ptl)%par_diffuse
+>  albedo_soil=spin(ptl)%albedo_soil
+>  albedo_veg=spin(ptl)%albedo_veg
+>  radnet_soil=spin(ptl)%radnet_soil
+>  radnet_veg=spin(ptl)%radnet_veg
+>  ir_tree=spin(ptl)%ir_tree
+>  ir_grass=spin(ptl)%ir_grass
+>  bowen_ratio=spin(ptl)%bowen_ratio
+>  gdd0=spin(ptl)%gdd0
+>  gdd5=spin(ptl)%gdd5
+>  par_direct_rel=spin(ptl)%par_direct_rel
+>  par_diffuse_rel=spin(ptl)%par_diffuse_rel
+>  par_floor_rel=spin(ptl)%par_floor_rel
+>  par_grass_rel=spin(ptl)%par_grass_rel
+>  sum_par_floor=spin(ptl)%sum_par_floor
+>  frac_crown_coverage=spin(ptl)%frac_crown_coverage
+> 
+> END SUBROUTINE spinup_in_allocate
+> 
+> !*************************************************************************************************
+> ! allocate spinup data  !ARAKIDA ADDED THIS SUBROUTINE FOR DA
+> !*************************************************************************************************
+> SUBROUTINE spinup_in_allocate2 (ptl)
+> 
+> !_____________ Set variables
+> !Namespace
+>    USE spinin_data
+>    USE data_structure
+>    USE time_counter
+>    USE vegi_status_current1
+>    USE grid_status_current1
+>    USE vegi_status_current2 
+>    USE grid_status_current2 
+>    implicit none
+>    
+> !Arguments
+>    integer,intent(IN)::ptl !particle number
+635a1281,1453
+> 
+> !_____________ Counter
+>  spin(ptl)%doy=spin2(ptl)%doy
+>  spin(ptl)%year=spin2(ptl)%year
+>  spin(ptl)%year_climate=spin2(ptl)%year_climate
+>  spin(ptl)%counter=spin2(ptl)%counter
+>  spin(ptl)%randomnumber=spin2(ptl)%randomnumber
+> 
+> !_____________ Main part1 (variables of vegi_status_current1)
+>  spin(ptl)%biome=spin2(ptl)%biome
+>  spin(ptl)%lai_max=spin2(ptl)%lai_max
+>  spin(ptl)%lai_max_wood=spin2(ptl)%lai_max_wood
+>  spin(ptl)%lai_max_grass=spin2(ptl)%lai_max_grass
+>  spin(ptl)%lai_mean_wood=spin2(ptl)%lai_mean_wood
+>  spin(ptl)%lai_mean_grass=spin2(ptl)%lai_mean_grass
+>  spin(ptl)%phenology=spin2(ptl)%phenology
+>  spin(ptl)%pft_exist=spin2(ptl)%pft_exist
+>  spin(ptl)%dfl_leaf_onset=spin2(ptl)%dfl_leaf_onset
+>  spin(ptl)%dfl_leaf_shed=spin2(ptl)%dfl_leaf_shed
+>  spin(ptl)%stat_water=spin2(ptl)%stat_water
+>  spin(ptl)%tree_exist=spin2(ptl)%tree_exist
+>  spin(ptl)%pft=spin2(ptl)%pft
+>  spin(ptl)%age=spin2(ptl)%age
+>  spin(ptl)%height=spin2(ptl)%height
+>  spin(ptl)%bole=spin2(ptl)%bole
+>  spin(ptl)%height_limit=spin2(ptl)%height_limit
+>  spin(ptl)%flag_suppress=spin2(ptl)%flag_suppress
+>  spin(ptl)%dbh_heartwood=spin2(ptl)%dbh_heartwood
+>  spin(ptl)%dbh_sapwood=spin2(ptl)%dbh_sapwood
+>  spin(ptl)%crown_diameter=spin2(ptl)%crown_diameter
+>  spin(ptl)%crown_area=spin2(ptl)%crown_area
+>  spin(ptl)%bole_x=spin2(ptl)%bole_x
+>  spin(ptl)%bole_y=spin2(ptl)%bole_y
+>  spin(ptl)%crown_x=spin2(ptl)%crown_x
+>  spin(ptl)%crown_y=spin2(ptl)%crown_y
+>  spin(ptl)%radius_limit=spin2(ptl)%radius_limit
+>  spin(ptl)%la=spin2(ptl)%la
+>  spin(ptl)%mass_leaf=spin2(ptl)%mass_leaf
+>  spin(ptl)%mass_trunk=spin2(ptl)%mass_trunk
+>  spin(ptl)%mass_root=spin2(ptl)%mass_root
+>  spin(ptl)%mass_stock=spin2(ptl)%mass_stock
+>  spin(ptl)%mass_available=spin2(ptl)%mass_available
+>  spin(ptl)%mort_regu1=spin2(ptl)%mort_regu1
+>  spin(ptl)%mort_regu2=spin2(ptl)%mort_regu2
+>  spin(ptl)%mort_regu4=spin2(ptl)%mort_regu4
+>  spin(ptl)%stat_leaf_crowntop=spin2(ptl)%stat_leaf_crowntop
+>  spin(ptl)%stat_leaf_crownbottom=spin2(ptl)%stat_leaf_crownbottom
+>  spin(ptl)%gmass_leaf=spin2(ptl)%gmass_leaf
+>  spin(ptl)%gmass_root=spin2(ptl)%gmass_root
+>  spin(ptl)%gmass_available=spin2(ptl)%gmass_available
+>  spin(ptl)%gmass_stock=spin2(ptl)%gmass_stock
+>  spin(ptl)%lai_grass=spin2(ptl)%lai_grass
+>  spin(ptl)%lai_opt_grass_RunningRecord=spin2(ptl)%lai_opt_grass_RunningRecord
+>  spin(ptl)%phenology_RunningRecord=spin2(ptl)%phenology_RunningRecord
+>  spin(ptl)%npp_RunningRecord=spin2(ptl)%npp_RunningRecord
+>  spin(ptl)%gpp_RunningRecord=spin2(ptl)%gpp_RunningRecord
+>  spin(ptl)%stat_water_RunningRecord=spin2(ptl)%stat_water_RunningRecord
+>  spin(ptl)%mass_sum_RunningRecord=spin2(ptl)%mass_sum_RunningRecord
+> 
+> !_____________ Main part1 (variables of vegi_status_current2)
+>  spin(ptl)%C3g_no=spin2(ptl)%C3g_no
+>  spin(ptl)%C4g_no=spin2(ptl)%C4g_no
+>  spin(ptl)%canopy_cond=spin2(ptl)%canopy_cond
+>  spin(ptl)%eK=spin2(ptl)%eK
+>  spin(ptl)%lue=spin2(ptl)%lue
+>  spin(ptl)%co2cmp=spin2(ptl)%co2cmp
+>  spin(ptl)%psat=spin2(ptl)%psat
+>  spin(ptl)%stat_leaf_crownbottom_daily=spin2(ptl)%stat_leaf_crownbottom_daily
+>  spin(ptl)%lue_grass=spin2(ptl)%lue_grass
+>  spin(ptl)%co2cmp_grass=spin2(ptl)%co2cmp_grass
+>  spin(ptl)%psat_grass=spin2(ptl)%psat_grass
+>  spin(ptl)%gpp=spin2(ptl)%gpp
+>  spin(ptl)%npp=spin2(ptl)%npp
+>  spin(ptl)%gpp_daily_ind=spin2(ptl)%gpp_daily_ind
+>  spin(ptl)%resp_trunk=spin2(ptl)%resp_trunk
+>  spin(ptl)%resp_leaf=spin2(ptl)%resp_leaf
+>  spin(ptl)%resp_root=spin2(ptl)%resp_root
+>  spin(ptl)%resp_grass_ag=spin2(ptl)%resp_grass_ag
+>  spin(ptl)%resp_grass_bg=spin2(ptl)%resp_grass_bg
+>  spin(ptl)%flux_litter_trunk=spin2(ptl)%flux_litter_trunk
+>  spin(ptl)%flux_litter_leaf=spin2(ptl)%flux_litter_leaf
+>  spin(ptl)%flux_litter_root=spin2(ptl)%flux_litter_root
+>  spin(ptl)%flux_litter_ag=spin2(ptl)%flux_litter_ag
+>  spin(ptl)%flux_litter_bg=spin2(ptl)%flux_litter_bg
+>  spin(ptl)%patch_vacant=spin2(ptl)%patch_vacant
+> 
+> !_____________ Main part2 (variables of grid_status_current1)
+> 
+>  spin(ptl)%dfl_fire=spin2(ptl)%dfl_fire
+>  spin(ptl)%fire_number=spin2(ptl)%fire_number
+>  spin(ptl)%tmp_coldest_20yr_ave=spin2(ptl)%tmp_coldest_20yr_ave
+>  spin(ptl)%tmp_hottest_20yr_ave=spin2(ptl)%tmp_hottest_20yr_ave
+>  spin(ptl)%gdd_20yr_ave=spin2(ptl)%gdd_20yr_ave
+>  spin(ptl)%pool_litter_trunk=spin2(ptl)%pool_litter_trunk
+>  spin(ptl)%pool_litter_leaf=spin2(ptl)%pool_litter_leaf
+>  spin(ptl)%pool_litter_root=spin2(ptl)%pool_litter_root
+>  spin(ptl)%pool_litter_ag=spin2(ptl)%pool_litter_ag
+>  spin(ptl)%pool_litter_bg=spin2(ptl)%pool_litter_bg
+>  spin(ptl)%pool_som_int=spin2(ptl)%pool_som_int
+>  spin(ptl)%pool_som_slow=spin2(ptl)%pool_som_slow
+>  spin(ptl)%pool_fuel_standT=spin2(ptl)%pool_fuel_standT
+>  spin(ptl)%pool_fuel_standG=spin2(ptl)%pool_fuel_standG
+>  spin(ptl)%pool_w=spin2(ptl)%pool_w
+>  spin(ptl)%pool_snow=spin2(ptl)%pool_snow
+>  spin(ptl)%gdd_20yr_RunningRecord=spin2(ptl)%gdd_20yr_RunningRecord
+>  spin(ptl)%tmp_coldest_RunningRecord=spin2(ptl)%tmp_coldest_RunningRecord
+>  spin(ptl)%tmp_hottest_RunningRecord=spin2(ptl)%tmp_hottest_RunningRecord
+>  spin(ptl)%tmp_ave_GrassGrowth_RR=spin2(ptl)%tmp_ave_GrassGrowth_RR
+>  spin(ptl)%pool_c_RR=spin2(ptl)%pool_c_RR
+>  spin(ptl)%flux_c_uptake_RR=spin2(ptl)%flux_c_uptake_RR
+>  spin(ptl)%flux_c_mnt_RR=spin2(ptl)%flux_c_mnt_RR
+>  spin(ptl)%flux_c_gro_RR=spin2(ptl)%flux_c_gro_RR
+>  spin(ptl)%flux_c_htr_RR=spin2(ptl)%flux_c_htr_RR
+>  spin(ptl)%flux_c_fir_RR=spin2(ptl)%flux_c_fir_RR
+>  spin(ptl)%flux_ro_RunningRecord=spin2(ptl)%flux_ro_RunningRecord
+>  spin(ptl)%flux_ic_RunningRecord=spin2(ptl)%flux_ic_RunningRecord
+>  spin(ptl)%flux_ev_RunningRecord=spin2(ptl)%flux_ev_RunningRecord
+>  spin(ptl)%flux_tr_RunningRecord=spin2(ptl)%flux_tr_RunningRecord
+>  spin(ptl)%tmp_air_RunningRecord=spin2(ptl)%tmp_air_RunningRecord
+>  spin(ptl)%tmp_soil_RunningRecord=spin2(ptl)%tmp_soil_RunningRecord
+>  spin(ptl)%prec_RunningRecord=spin2(ptl)%prec_RunningRecord
+>  spin(ptl)%ev_pot_RunningRecord=spin2(ptl)%ev_pot_RunningRecord
+>  spin(ptl)%par_RunningRecord=spin2(ptl)%par_RunningRecord
+>  spin(ptl)%pool_w1_RunningRecord=spin2(ptl)%pool_w1_RunningRecord 
+> 
+> !_____________ Main part2 (variables of grid_status_current2)
+> 
+>  spin(ptl)%co2atm=spin2(ptl)%co2atm
+>  spin(ptl)%ap=spin2(ptl)%ap
+>  spin(ptl)%vp=spin2(ptl)%vp
+>  spin(ptl)%vpd=spin2(ptl)%vpd
+>  spin(ptl)%dnsa=spin2(ptl)%dnsa
+>  spin(ptl)%vp_sat=spin2(ptl)%vp_sat
+>  spin(ptl)%slope_vps=spin2(ptl)%slope_vps
+>  spin(ptl)%sl_hgt=spin2(ptl)%sl_hgt
+>  spin(ptl)%dlen=spin2(ptl)%dlen
+>  spin(ptl)%rad=spin2(ptl)%rad
+>  spin(ptl)%par=spin2(ptl)%par
+>  spin(ptl)%par_direct=spin2(ptl)%par_direct
+>  spin(ptl)%par_diffuse=spin2(ptl)%par_diffuse
+>  spin(ptl)%albedo_soil=spin2(ptl)%albedo_soil
+>  spin(ptl)%albedo_veg=spin2(ptl)%albedo_veg
+>  spin(ptl)%radnet_soil=spin2(ptl)%radnet_soil
+>  spin(ptl)%radnet_veg=spin2(ptl)%radnet_veg
+>  spin(ptl)%ir_tree=spin2(ptl)%ir_tree
+>  spin(ptl)%ir_grass=spin2(ptl)%ir_grass
+>  spin(ptl)%bowen_ratio=spin2(ptl)%bowen_ratio
+>  spin(ptl)%gdd0=spin2(ptl)%gdd0
+>  spin(ptl)%gdd5=spin2(ptl)%gdd5
+>  spin(ptl)%par_direct_rel=spin2(ptl)%par_direct_rel
+>  spin(ptl)%par_diffuse_rel=spin2(ptl)%par_diffuse_rel
+>  spin(ptl)%par_floor_rel=spin2(ptl)%par_floor_rel
+>  spin(ptl)%par_grass_rel=spin2(ptl)%par_grass_rel
+>  spin(ptl)%sum_par_floor=spin2(ptl)%sum_par_floor
+>  spin(ptl)%frac_crown_coverage=spin2(ptl)%frac_crown_coverage
+> 
+> END SUBROUTINE spinup_in_allocate2
+> 
+> !*************************************************************************************************
+> ! allocate spinup data  !ARAKIDA ADDED THIS SUBROUTINE FOR DA
+> !*************************************************************************************************
+> SUBROUTINE spinup_out_allocate (ptl)
+> 
+> !_____________ Set variables
+> !Namespace
+>    USE spinin_data 
+>    USE data_structure
+>    USE time_counter
+>    USE vegi_status_current1
+>    USE grid_status_current1
+>    USE vegi_status_current2 
+>    USE grid_status_current2 
+>    implicit none
+636a1455,1467
+> !Arguments
+>    integer,intent(IN)::ptl !particle number
+>    
+> !Local variables
+>    integer n ,i, j
+> 
+> !_____________ Counter
+>  spin2(ptl)%doy=doy
+>  spin2(ptl)%year=year
+>  spin2(ptl)%year_climate=year_climate
+>  spin2(ptl)%counter=counter
+>  spin2(ptl)%randomnumber=randomnumber
+> 
+638,639c1469,1614
+< read (Fn,*) Spinup_year
+< read (Fn,*) tree_exist(:)                !This variable must be read at the beggining
+---
+>  spin2(ptl)%biome=biome
+>  spin2(ptl)%lai_max=lai_max
+>  spin2(ptl)%lai_max_wood=lai_max_wood
+>  spin2(ptl)%lai_max_grass=lai_max_grass
+>  spin2(ptl)%lai_mean_wood=lai_mean_wood
+>  spin2(ptl)%lai_mean_grass=lai_mean_grass
+>  spin2(ptl)%phenology=phenology
+>  spin2(ptl)%pft_exist=pft_exist
+>  spin2(ptl)%dfl_leaf_onset=dfl_leaf_onset
+>  spin2(ptl)%dfl_leaf_shed=dfl_leaf_shed
+>  spin2(ptl)%stat_water=stat_water
+>  spin2(ptl)%tree_exist=tree_exist
+>  spin2(ptl)%pft=pft
+>  spin2(ptl)%age=age
+>  spin2(ptl)%height=height
+>  spin2(ptl)%bole=bole
+>  spin2(ptl)%height_limit=height_limit
+>  spin2(ptl)%flag_suppress=flag_suppress
+>  spin2(ptl)%dbh_heartwood=dbh_heartwood
+>  spin2(ptl)%dbh_sapwood=dbh_sapwood
+>  spin2(ptl)%crown_diameter=crown_diameter
+>  spin2(ptl)%crown_area=crown_area
+>  spin2(ptl)%bole_x=bole_x
+>  spin2(ptl)%bole_y=bole_y
+>  spin2(ptl)%crown_x=crown_x
+>  spin2(ptl)%crown_y=crown_y
+>  spin2(ptl)%radius_limit=radius_limit
+>  spin2(ptl)%la=la
+>  spin2(ptl)%mass_leaf=mass_leaf
+>  spin2(ptl)%mass_trunk=mass_trunk
+>  spin2(ptl)%mass_root=mass_root
+>  spin2(ptl)%mass_stock=mass_stock
+>  spin2(ptl)%mass_available=mass_available
+>  spin2(ptl)%mort_regu1=mort_regu1
+>  spin2(ptl)%mort_regu2=mort_regu2
+>  spin2(ptl)%mort_regu4=mort_regu4
+>  spin2(ptl)%stat_leaf_crowntop=stat_leaf_crowntop
+>  spin2(ptl)%stat_leaf_crownbottom=stat_leaf_crownbottom
+>  spin2(ptl)%gmass_leaf=gmass_leaf
+>  spin2(ptl)%gmass_root=gmass_root
+>  spin2(ptl)%gmass_available=gmass_available
+>  spin2(ptl)%gmass_stock=gmass_stock
+>  spin2(ptl)%lai_grass=lai_grass
+>  spin2(ptl)%lai_opt_grass_RunningRecord=lai_opt_grass_RunningRecord
+>  spin2(ptl)%phenology_RunningRecord=phenology_RunningRecord
+>  spin2(ptl)%npp_RunningRecord=npp_RunningRecord
+>  spin2(ptl)%gpp_RunningRecord=gpp_RunningRecord
+>  spin2(ptl)%stat_water_RunningRecord=stat_water_RunningRecord
+>  spin2(ptl)%mass_sum_RunningRecord=mass_sum_RunningRecord
+> 
+> !_____________ Main part1 (variables of vegi_status_current2)
+>  spin2(ptl)%C3g_no=C3g_no
+>  spin2(ptl)%C4g_no=C4g_no
+>  spin2(ptl)%canopy_cond=canopy_cond
+>  spin2(ptl)%eK=eK
+>  spin2(ptl)%lue=lue
+>  spin2(ptl)%co2cmp=co2cmp
+>  spin2(ptl)%psat=psat
+>  spin2(ptl)%stat_leaf_crownbottom_daily=stat_leaf_crownbottom_daily
+>  spin2(ptl)%lue_grass=lue_grass
+>  spin2(ptl)%co2cmp_grass=co2cmp_grass
+>  spin2(ptl)%psat_grass=psat_grass
+>  spin2(ptl)%gpp=gpp
+>  spin2(ptl)%npp=npp
+>  spin2(ptl)%gpp_daily_ind=gpp_daily_ind
+>  spin2(ptl)%resp_trunk=resp_trunk
+>  spin2(ptl)%resp_leaf=resp_leaf
+>  spin2(ptl)%resp_root=resp_root
+>  spin2(ptl)%resp_grass_ag=resp_grass_ag
+>  spin2(ptl)%resp_grass_bg=resp_grass_bg
+>  spin2(ptl)%flux_litter_trunk=flux_litter_trunk
+>  spin2(ptl)%flux_litter_leaf=flux_litter_leaf
+>  spin2(ptl)%flux_litter_root=flux_litter_root
+>  spin2(ptl)%flux_litter_ag=flux_litter_ag
+>  spin2(ptl)%flux_litter_bg=flux_litter_bg
+>  spin2(ptl)%patch_vacant=patch_vacant
+> 
+> !_____________ Main part2 (variables of grid_status_current1)
+> 
+>  spin2(ptl)%dfl_fire=dfl_fire
+>  spin2(ptl)%fire_number=fire_number
+>  spin2(ptl)%tmp_coldest_20yr_ave=tmp_coldest_20yr_ave
+>  spin2(ptl)%tmp_hottest_20yr_ave=tmp_hottest_20yr_ave
+>  spin2(ptl)%gdd_20yr_ave=gdd_20yr_ave
+>  spin2(ptl)%pool_litter_trunk=pool_litter_trunk
+>  spin2(ptl)%pool_litter_leaf=pool_litter_leaf
+>  spin2(ptl)%pool_litter_root=pool_litter_root
+>  spin2(ptl)%pool_litter_ag=pool_litter_ag
+>  spin2(ptl)%pool_litter_bg=pool_litter_bg
+>  spin2(ptl)%pool_som_int=pool_som_int
+>  spin2(ptl)%pool_som_slow=pool_som_slow
+>  spin2(ptl)%pool_fuel_standT=pool_fuel_standT
+>  spin2(ptl)%pool_fuel_standG=pool_fuel_standG
+>  spin2(ptl)%pool_w=pool_w
+>  spin2(ptl)%pool_snow=pool_snow
+>  spin2(ptl)%gdd_20yr_RunningRecord=gdd_20yr_RunningRecord
+>  spin2(ptl)%tmp_coldest_RunningRecord=tmp_coldest_RunningRecord
+>  spin2(ptl)%tmp_hottest_RunningRecord=tmp_hottest_RunningRecord
+>  spin2(ptl)%tmp_ave_GrassGrowth_RR=tmp_ave_GrassGrowth_RR
+>  spin2(ptl)%pool_c_RR=pool_c_RR
+>  spin2(ptl)%flux_c_uptake_RR=flux_c_uptake_RR
+>  spin2(ptl)%flux_c_mnt_RR=flux_c_mnt_RR
+>  spin2(ptl)%flux_c_gro_RR=flux_c_gro_RR
+>  spin2(ptl)%flux_c_htr_RR=flux_c_htr_RR
+>  spin2(ptl)%flux_c_fir_RR=flux_c_fir_RR
+>  spin2(ptl)%flux_ro_RunningRecord=flux_ro_RunningRecord
+>  spin2(ptl)%flux_ic_RunningRecord=flux_ic_RunningRecord
+>  spin2(ptl)%flux_ev_RunningRecord=flux_ev_RunningRecord
+>  spin2(ptl)%flux_tr_RunningRecord=flux_tr_RunningRecord
+>  spin2(ptl)%tmp_air_RunningRecord=tmp_air_RunningRecord
+>  spin2(ptl)%tmp_soil_RunningRecord=tmp_soil_RunningRecord
+>  spin2(ptl)%prec_RunningRecord=prec_RunningRecord
+>  spin2(ptl)%ev_pot_RunningRecord=ev_pot_RunningRecord
+>  spin2(ptl)%par_RunningRecord=par_RunningRecord
+>  spin2(ptl)%pool_w1_RunningRecord=pool_w1_RunningRecord 
+> 
+> !_____________ Main part2 (variables of grid_status_current2)
+> 
+>  spin2(ptl)%co2atm=co2atm
+>  spin2(ptl)%ap=ap
+>  spin2(ptl)%vp=vp
+>  spin2(ptl)%vpd=vpd
+>  spin2(ptl)%dnsa=dnsa
+>  spin2(ptl)%vp_sat=vp_sat
+>  spin2(ptl)%slope_vps=slope_vps
+>  spin2(ptl)%sl_hgt=sl_hgt
+>  spin2(ptl)%dlen=dlen
+>  spin2(ptl)%rad=rad
+>  spin2(ptl)%par=par
+>  spin2(ptl)%par_direct=par_direct
+>  spin2(ptl)%par_diffuse=par_diffuse
+>  spin2(ptl)%albedo_soil=albedo_soil
+>  spin2(ptl)%albedo_veg=albedo_veg
+>  spin2(ptl)%radnet_soil=radnet_soil
+>  spin2(ptl)%radnet_veg=radnet_veg
+>  spin2(ptl)%ir_tree=ir_tree
+>  spin2(ptl)%ir_grass=ir_grass
+>  spin2(ptl)%bowen_ratio=bowen_ratio
+>  spin2(ptl)%gdd0=gdd0
+>  spin2(ptl)%gdd5=gdd5
+>  spin2(ptl)%par_direct_rel=par_direct_rel
+>  spin2(ptl)%par_diffuse_rel=par_diffuse_rel
+>  spin2(ptl)%par_floor_rel=par_floor_rel
+>  spin2(ptl)%par_grass_rel=par_grass_rel
+>  spin2(ptl)%sum_par_floor=sum_par_floor
+>  spin2(ptl)%frac_crown_coverage=frac_crown_coverage
+641,687c1616
+< read (Fn,*) biome
+< read (Fn,*) lai_max_wood
+< read (Fn,*) lai_max_grass
+< read (Fn,*) lai_mean_wood
+< read (Fn,*) lai_mean_grass
+< 
+< read (Fn,*) phenology      (:)
+< read (Fn,*) pft_exist      (:)
+< read (Fn,*) dfl_leaf_onset (:)
+< read (Fn,*) dfl_leaf_shed  (:)
+< read (Fn,*) stat_water     (:)
+< 
+< Do n=1, Max_no
+< if (tree_exist(n)) then
+<    read (Fn,*) pft(n), age(n), height(n), bole(n), height_limit(n), flag_suppress(n)
+<    read (Fn,*) dbh_heartwood(n), dbh_sapwood(n), crown_diameter(n), crown_area(n)
+<    read (Fn,*) bole_x(n), bole_y(n), crown_x(n), crown_y(n), radius_limit(n)
+<    read (Fn,*) la(n), mass_leaf(n), mass_trunk(n), mass_root(n), mass_stock(n), mass_available(n)
+<    read (Fn,*) mort_regu1(n), mort_regu2(n), mort_regu4(n)
+<    read (Fn,*) stat_leaf_crowntop(n), stat_leaf_crownbottom(n,:)
+< endif
+< End do
+< 
+< Do i=1, DivedG
+<    read (Fn,*) gmass_leaf      (i,:)
+<    read (Fn,*) gmass_root      (i,:)
+<    read (Fn,*) gmass_available (i,:)
+<    read (Fn,*) gmass_stock     (i,:)
+<    read (Fn,*) lai_grass       (i,:)
+< End do
+< 
+< Do i=1, DivedG
+< Do j=1, DivedG
+<    read (Fn,*) lai_opt_grass_RunningRecord(:,i,j)
+< End do
+< End do
+< 
+< Do i=1, Day_in_Year
+<    read (Fn,*) phenology_RunningRecord (i,:)
+<    read (Fn,*) npp_RunningRecord       (i,:)
+<    read (Fn,*) gpp_RunningRecord       (i,:)
+<    read (Fn,*) stat_water_RunningRecord(i,:)
+< End do
+< 
+< Do i=1, 20
+<    read (Fn,*) mass_sum_RunningRecord(i,:)
+< End do
+---
+> END SUBROUTINE spinup_out_allocate
+689,691d1617
+< !_____________ Main part2 (variables of vegi_status_current2)
+< read (Fn,*) dfl_fire, fire_number
+< read (Fn,*) tmp_coldest_20yr_ave, tmp_hottest_20yr_ave, gdd_20yr_ave
+693,724d1618
+< read (Fn,*) pool_litter_trunk, pool_litter_leaf, pool_litter_root
+< read (Fn,*) pool_litter_ag, pool_litter_bg, pool_som_int, pool_som_slow
+< read (Fn,*) pool_fuel_standT, pool_fuel_standG
+< read (Fn,*) pool_w(:), pool_snow
+< 
+< read (Fn,*) gdd_20yr_RunningRecord    (:)
+< read (Fn,*) tmp_coldest_RunningRecord (:)
+< read (Fn,*) tmp_hottest_RunningRecord (:)
+< read (Fn,*) tmp_ave_GrassGrowth_RR    (:)
+< 
+< !read (Fn,*) c_emission_RunningRecord(:)
+< !read (Fn,*) c_uptake_RunningRecord  (:)
+< 
+< read (Fn,*) pool_c_RR (:)
+< 
+< read (Fn,*) flux_c_uptake_RR (:)
+< read (Fn,*) flux_c_mnt_RR    (:)
+< read (Fn,*) flux_c_gro_RR    (:)
+< read (Fn,*) flux_c_htr_RR    (:)
+< read (Fn,*) flux_c_fir_RR    (:)
+< 
+< read (Fn,*) flux_ro_RunningRecord(:)
+< read (Fn,*) flux_ic_RunningRecord(:)
+< read (Fn,*) flux_ev_RunningRecord(:)
+< read (Fn,*) flux_tr_RunningRecord(:)
+< 
+< read (Fn,*) tmp_air_RunningRecord (:)
+< read (Fn,*) tmp_soil_RunningRecord(:)
+< read (Fn,*) prec_RunningRecord    (:)
+< read (Fn,*) ev_pot_RunningRecord  (:)
+< read (Fn,*) par_RunningRecord     (:)
+< read (Fn,*) pool_w1_RunningRecord (:)
+726d1619
+< END SUBROUTINE spinup_in
+Only in compared_code/seib_code271/code/: land_prop.txt
+diff compared_code/seib_code271/code/main.f90 seib271_pf200/scr/main.f90
+5c5
+< !*   All rights are reserved by Dr. Hisashi SATO                          *
+---
+> !*   All rights for SEIB-DGVM ver. 2.71 are reserved by Dr. Hisashi SATO  *
+17,18c17,20
+<            ALT, Albedo_soil0, W_fi, W_wilt, W_sat, W_mat )
+<    
+---
+>            !ALT, Albedo_soil0, W_fi, W_wilt, W_sat, W_mat) !ARAKIDA CHANGED FOR DA
+>            ALT, Albedo_soil0, W_fi, W_wilt, W_sat, W_mat, ptl2, ptl, da_flag, noise)
+>           
+>   
+63c65,74
+<    real,intent(IN):: W_mat        !matrix potential 
+---
+>    real,intent(IN):: W_mat        !matrix potential
+> 
+> !ARAKIDA ADDED FOR DA*******************************************************************************
+> !for data assimilation
+>    integer, intent(IN):: ptl
+>    integer, intent(IN):: ptl2
+>    logical, intent(IN):: da_flag
+>    real, intent(IN):: noise
+> !ARAKIDA ADDED FOR DA*******************************************************************************
+>    
+66c77
+<    integer               year_climate !Current climate year
+---
+>    !integer               year_climate !Current climate year !ARAKIDA MOVED "yaer_climate" TO "modules.f90" (MODULE time_counter) FOR DA
+70c81,83
+<    
+---
+>    integer                z           !ARAKIDA ADDED FOR DA
+>    integer              datsize       !ARAKIDA ADDED FOR DA    
+>   
+76a90
+>    counter = 0                        !ARAKIDA ADDED FOR DA
+78c92,93
+<    
+---
+>  
+> !ARAKIDA CHANGED FOR DA***************************************************************************
+79a95,100
+> !   if (Flag_spinup_read) then
+> !      open (File_no(1), file=Fn_spnin)
+> !      Call spinup_in (File_no(1))
+> !      close (File_no(1))
+> !   endif
+> 
+81,109c102
+<       open (File_no(1), file=Fn_spnin)
+<       Call spinup_in (File_no(1))
+<       close (File_no(1))
+<    endif
+<    
+< !_____________ Open output files
+<    open ( File_no( 1), file = 'output_log.txt'          )
+<    open ( File_no( 2), file = 'output.txt'              )
+<    open ( File_no( 3), file = 'output_climate.txt'      )
+<    open ( File_no( 4), file = 'output_air.txt'          )
+<    open ( File_no( 5), file = 'output_radiation.txt'    )
+<    open ( File_no( 6), file = 'output_netradiation.txt' )
+<    open ( File_no( 7), file = 'output_water.txt'        )
+<    open ( File_no( 8), file = 'output_grass.txt'        )
+<    open ( File_no( 9), file = 'output_lai.txt'          )
+<    open ( File_no(10), file = 'output_cflux.txt'        )
+<    open ( File_no(11), file = 'output_wflux.txt'        )
+<    open ( File_no(12), file = 'output_ld_vertical.txt'  )
+<    open ( File_no(13), file = 'output_annual.txt'       )
+<    open ( File_no(14), file = 'output_forest.txt'       )
+<    open ( File_no(15), file = 'output_biomass.txt'      )
+<    
+< !_____________ Initialize various counters for the daily simulation loop
+<    if (Flag_spinup_read) then
+<       counter_begin = 1 + Spinup_year*Day_in_Year
+<       counter_end   = (Simulation_year+Spinup_year) * Day_in_Year
+<    else
+<       counter_begin = 1
+<       counter_end   = Simulation_year * Day_in_Year
+---
+>       Call spinup_in_allocate (ptl2)
+110a104,116
+> !ARAKIDA CHANGED FOR DA***************************************************************************
+> 
+> !ARAKIDA ADDED FOR DA*******************************************************************************
+> !Read Parameters
+>    Pmax(11)=Parameterin(ptl,1)
+>    Pmax(13)=Parameterin(ptl,2)
+>    Fol_f=Parameterin(ptl,3) !THIS PARAMETER IS NOT USED IN THIS EXPERIMENT
+>    Fol_g=Parameterin(ptl,4) !THIS PARAMETER IS NOT USED IN THIS EXPERIMENT
+>    Dor_f=Parameterin(ptl,5)
+>    Dor_g=Parameterin(ptl,6)
+> !ARAKIDA ADDED FOR DA*******************************************************************************
+> 
+> !ARAKIDA DELATED FOR DA*****************************************************************************
+112,116c118,150
+< !This loop corresponds to a simulation day, which calls subroutines sequentially.
+< !For readability of the code, I tried to avoid to call another subroutine 
+< !from the subroutine that was called from this loop.
+< DO counter = counter_begin, counter_end
+<    
+---
+> !!_____________ Open output files
+> !   open ( File_no( 1), file = 'output_log.txt'          )
+> !   open ( File_no( 2), file = 'output.txt'              )
+> !   open ( File_no( 3), file = 'output_climate.txt'      )
+> !   open ( File_no( 4), file = 'output_air.txt'          )
+> !   open ( File_no( 5), file = 'output_radiation.txt'    )
+> !   open ( File_no( 6), file = 'output_netradiation.txt' )
+> !   open ( File_no( 7), file = 'output_water.txt'        )
+> !   open ( File_no( 8), file = 'output_grass.txt'        )
+> !   open ( File_no( 9), file = 'output_lai.txt'          )
+> !   open ( File_no(10), file = 'output_cflux.txt'        ) 
+> !   open ( File_no(11), file = 'output_wflux.txt'        )
+> !   open ( File_no(12), file = 'output_ld_vertical.txt'  )
+> !   open ( File_no(13), file = 'output_annual.txt'       )
+> !   open ( File_no(14), file = 'output_forest.txt'       )
+> !   open ( File_no(15), file = 'output_biomass.txt'      )
+> !
+> !!_____________ Initialize various counters for the daily simulation loop
+> !
+> !   if (Flag_spinup_read) then
+> !      counter_begin = 1 + Spinup_year*Day_in_Year
+> !      counter_end   = (Simulation_year+Spinup_year) * Day_in_Year
+> !   else
+> !      counter_begin = 1
+> !      counter_end   = Simulation_year * Day_in_Year
+> !   endif
+> ! 
+> !!This loop corresponds to a simulation day, which calls subroutines sequentially.
+> !!For readability of the code, I tried to avoid to call another subroutine 
+> !!from the subroutine that was called from this loop.
+> !
+> !   DO counter = counter_begin, counter_end 
+> !
+118c152,166
+<    if (Logging==1) write (File_no(1),*) 'Daily update of field statuses'
+---
+> !   if (Logging==1) write (File_no(1),*) 'Daily update of field statuses'
+> 
+> !ARAKIDA DELATED FOR DA*****************************************************************************
+> 
+> !ARAKIDA ADDED FOR DA*******************************************************************************
+>    if (Asim_span < 10.0) then
+>       if (doy == 361)then 
+>          Asim_span = 5
+>       else
+>          Asim_span = 4 
+>       endif
+>    endif
+> 
+>    DO datloop = 1, Asim_span 
+> !ARAKIDA ADDED FOR DA*******************************************************************************
+121a170
+>    counter = counter + 1  !ARAKIDA ADDED FOR DA
+125d173
+<       
+128a177,178
+> 
+> 
+179,181c229,233
+<    
+< !_____________ Daily update of field records (running recorders, annual means, etc..)
+<    if (Logging==1) write (File_no(1),*) 'Daily update of field records'
+---
+> 
+> !ARAKIDA DELATED FOR DA*****************************************************************************      
+> !!_____________ Daily update of field records (running recorders, annual means, etc..)
+> !   if (Logging==1) write (File_no(1),*) 'Daily update of field records'
+> !ARAKIDA DELATED FOR DA*****************************************************************************   
+201,203c253,257
+<    
+< !_____________ DAILY PSYSICAL PROCESSES
+<    if (Logging==1) write (File_no(1),*) 'DAILY PSYSIOLOGICAL PROCESSES'
+---
+> 
+> !ARAKIDA DELATED FOR DA*****************************************************************************   
+> !!_____________ DAILY PSYSICAL PROCESSES
+> !   if (Logging==1) write (File_no(1),*) 'DAILY PSYSIOLOGICAL PROCESSES'
+> !ARAKIDA DELATED FOR DA*****************************************************************************
+239,249c293,305
+<    !Wild fire subroutines
+<    if (LON<-20 .or. 60<LON .or. 35.0<LAT) then
+<      !Default
+<      Call fire_regime (W_fi)
+<    else
+<      !African continent
+<      Call fire_regime2 ( (wind(doy,year_climate)) )
+<    endif
+<    
+< !_____________ DAILY BIOLOGICAL PROCESSES
+<    if (Logging==1) write (File_no(1),*) 'DAILY BIOLOGICAL PROCESSES'
+---
+> !ARAKIDA DELATED FOR DA*****************************************************************************
+> !   !Wild fire subroutines 
+> !   if (LON<-20 .or. 60<LON .or. 35.0<LAT) then
+> !      !Default
+> !      Call fire_regime (W_fi)
+> !   else
+> !      !African continent
+> !      Call fire_regime2 ( (wind(doy,year_climate)) )
+> !   endif
+> !   
+> !!_____________ DAILY BIOLOGICAL PROCESSES
+> !   if (Logging==1) write (File_no(1),*) 'DAILY BIOLOGICAL PROCESSES'
+> !ARAKIDA DELATED FOR DA*****************************************************************************
+286,289c342,347
+<    
+< !_____________ ANNUALY BIOLOGICAL PROCESSES
+<    if (Logging==1) write (File_no(1),*) 'ANNUALY BIOLOGICAL PROCESSES'
+<    
+---
+> 
+> !ARAKIDA DELATED FOR DA*****************************************************************************   
+> !!_____________ ANNUALY BIOLOGICAL PROCESSES
+> !   if (Logging==1) write (File_no(1),*) 'ANNUALY BIOLOGICAL PROCESSES'
+> !ARAKIDA DELATED FOR DA***************************************************************************** 
+>   
+330,332c388,392
+<    
+< !_____________ DAILY UPDATE NET-RADIATION & SOIL-WATER STATUS
+<    if (Logging==1) write (File_no(1),*) 'DAILY UPDATE NET-RADIATION & SOIL-WATER STATUS'
+---
+> 
+> !ARAKIDA DELATED FOR DA*****************************************************************************    
+> !!_____________ DAILY UPDATE NET-RADIATION & SOIL-WATER STATUS
+> !   if (Logging==1) write (File_no(1),*) 'DAILY UPDATE NET-RADIATION & SOIL-WATER STATUS'
+> !ARAKIDA DELATED FOR DA***************************************************************************** 
+356c416
+<    
+---
+>   
+359,395c419,472
+<    
+<    !Daily output (everyday)
+<    Call output_for_viewer &
+<    (File_no(2), LAT, LON, ALT, Albedo_soil0, W_fi, W_wilt, W_sat, W_mat, &
+<    tmp_air(doy,year_climate), sum(tmp_soil(1:5))/5.0, &
+<    cloud(doy,year_climate), prec(doy,year_climate), &
+<    humid(doy,year_climate), wind(doy,year_climate))
+<    
+<    !Daily output (on each specifyed year)
+<    Call output_climate &
+<    (File_no( 3), tmp_air(doy,year_climate), sum(tmp_soil(1:5))/5.0, &
+<    cloud(doy,year_climate), prec(doy,year_climate), &
+<    humid(doy,year_climate), wind(doy,year_climate))
+<    Call output_air          (File_no( 4))
+<    Call output_radiation    (File_no( 5))
+<    Call output_netradiation (File_no( 6))
+<    Call output_water        (File_no( 7), W_fi, W_wilt, W_sat)
+<    Call output_grass        (File_no( 8))
+<    Call output_lai          (File_no( 9))
+<    Call output_cflux        (File_no(10))
+<    Call output_wflux        (File_no(11), prec(doy,year_climate))
+<    
+<    !Monthly output
+<    if ( Day_of_Month(doy) == Day_in_month(Month(doy)) ) then
+<       Call output_ld_vertical (File_no(12))
+<    endif
+<    
+<    !Annual output
+<    if (doy == Day_in_Year) then
+<       Call output_annual (File_no(13))
+<       Call output_forest (File_no(14))
+<    endif
+<    
+<    if (doy == 195) then
+<       Call output_biomass(File_no(15))
+<    endif
+<    
+---
+> 
+> !ARAKIDA CHANGED FOR DA (OUTPUT AS BINARY, AND ONLY SOME OF DAILY OUTPUTS WERE SELECTED)**********     
+> !   !Daily output (everyday)
+> !   Call output_for_viewer &
+> !   (File_no(2), LAT, LON, ALT, Albedo_soil0, W_fi, W_wilt, W_sat, W_mat, &
+> !   tmp_air(doy,year_climate), sum(tmp_soil(1:5))/5.0, &
+> !   cloud(doy,year_climate), prec(doy,year_climate), &
+> !   humid(doy,year_climate), wind(doy,year_climate))
+> !      
+> !   !Daily output (on each specifyed year)
+> !   Call output_climate &
+> !   (File_no( 3), tmp_air(doy,year_climate), sum(tmp_soil(1:5))/5.0, &
+> !   cloud(doy,year_climate), prec(doy,year_climate), &
+> !   humid(doy,year_climate), wind(doy,year_climate))
+> !   Call output_air          (File_no( 4))
+> !   Call output_radiation    (File_no( 5))
+> !   Call output_netradiation (File_no( 6))
+> !   Call output_water        (File_no( 7), W_fi, W_wilt, W_sat)
+> !   Call output_grass        (File_no( 8))
+> !   Call output_lai          (File_no( 9), lainow)
+> !   Call output_cflux        (File_no(10))
+> !   Call output_wflux        (File_no(11), prec(doy,year_climate))
+> !
+> !   !Monthly output
+> !   if ( Day_of_Month(doy) == Day_in_month(Month(doy)) ) then
+> !      Call output_ld_vertical (File_no(12))
+> !   endif
+> !   
+> !   !Annual output
+> !   if (doy == Day_in_Year) then
+> !      Call output_annual (File_no(13))
+> !      Call output_forest (File_no(14))
+> !   endif
+> !
+> !   if (doy == 195) then
+> !      Call output_biomass(File_no(15))
+> !   endif
+>  
+>      Call output_annual
+>      Call output_netradiation
+>      Call output_water (W_fi, W_wilt, W_sat)
+>      Call output_cflux
+>      Call output_wflux (prec(doy,year_climate))
+>      Call output_lai (lainow)
+> 
+>      if (seib_pf_switch==1 .or. seib_pf_switch==2) then
+>         z=Asim_span*(ptl-1) + datloop !spinout=1day
+>         write( 43, rec=z) binaryout
+>      else
+>         write( 43, rec=daout_counter) binaryout
+>         daout_counter= daout_counter + 1
+>      endif
+> !ARAKIDA CHANGED FOR DA (OUTPUT AS BINARY, AND ONLY SOME OF DAILY OUTPUTS WERE SELECTED)**********  
+> 
+400,422c477,503
+< !_____________ After Main-simulation-loop procedures
+<    close (File_no( 1))   !output_log.txt
+<    close (File_no( 2))   !output.txt
+<    close (File_no( 3))   !output_climate.txt
+<    close (File_no( 4))   !output_air.txt
+<    close (File_no( 5))   !output_radiation.txt
+<    close (File_no( 6))   !output_netradiation.txt
+<    close (File_no( 7))   !output_water.txt
+<    close (File_no( 8))   !output_grass.txt
+<    close (File_no( 9))   !output_lai.txt
+<    close (File_no(10))   !output_cflux.txt
+<    close (File_no(11))   !output_wflux.txt
+<    close (File_no(12))   !output_ld_vertical.txt
+<    close (File_no(13))   !output_annual.txt
+<    close (File_no(14))   !output_forest.txt
+<    close (File_no(15))   !output_biomass.txt
+<    
+< IF ( Flag_spinup_write ) then
+<    !Write spinup data for restarting simualtion
+<    open(File_no(1), file = Fn_spnout)
+<    Call spinup_out (File_no(1))
+<    close (File_no(1))
+< END IF
+---
+> !ARAKIDA DELATED FOR DA***************************************************************************** 
+> !!_____________ After Main-simulation-loop procedures
+> !   close (File_no( 1))   !output_log.txt
+> !   close (File_no( 2))   !output.txt
+> !   close (File_no( 3))   !output_climate.txt
+> !   close (File_no( 4))   !output_air.txt
+> !   close (File_no( 5))   !output_radiation.txt
+> !   close (File_no( 6))   !output_netradiation.txt
+> !   close (File_no( 7))   !output_water.txt
+> !   close (File_no( 8))   !output_grass.txt
+> !   close (File_no( 9))   !output_lai.txt
+> !   close (File_no(10))   !output_cflux.txt
+> !   close (File_no(11))   !output_wflux.txt
+> !   close (File_no(12))   !output_ld_vertical.txt
+> !   close (File_no(13))   !output_annual.txt
+> !   close (File_no(14))   !output_forest.txt
+> !   close (File_no(15))   !output_biomass.txt
+>  
+> !IF ( Flag_spinup_write ) then
+> !   !Write spinup data for restarting simualtion
+> !   open(File_no(1), file = Fn_spnout) 
+> !   Call spinup_out (File_no(1)) 
+> !   close (File_no(1))
+> !END IF
+> !ARAKIDA DELATED FOR DA***************************************************************************** 
+> 
+> 
+diff compared_code/seib_code271/code/metabolic.f90 seib271_pf200/scr/metabolic.f90
+55c55,56
+<       x = min( 1.0 , max(0.001, stat_water(p)) )
+---
+> !       x = min( 1.0 , max(0.001, stat_water(p)) )
+>        x = min( 1.0 , max(0.1, stat_water(p)) ) !ARAKIDA CHANGED FOR DA (0.001->0.1)
+460c461,462
+<    integer,parameter::Days_leaf_shed      = 14 !day length required for full leaf drop
+---
+>    !integer,parameter::Days_leaf_shed      = 14 !day length required for full leaf drop
+>    integer,parameter::Days_leaf_shed      = 30 !day length required for full leaf drop !ARAKIDA CHANGED FOR DA (14->30)
+464c466
+<    
+---
+> 
+466,467c468,470
+<    integer,parameter::Days_release_larch  = 7  !days required for full release of stock energy for larch
+<    
+---
+>    !integer,parameter::Days_release_larch  = 7  !days required for full release of stock energy for larch
+>    integer,parameter::Days_release_larch  = 60  !days required for full release of stock energy for larch !ARAKIDA CHANGED FOR DA (7->60)
+> 
+571,572c574,577
+<        if (x < 7.0)                                          flag(p)=.true.
+<        
+---
+> !ARAKIDA CHANGED FOR DA***************************************************************************
+> !       if (x < 7.0)                                          flag(p)=.true.
+>        if (doy >= Dor_f)                                     flag(p)=.true.
+> !ARAKIDA CHANGED FOR DA***************************************************************************
+586,591c591,598
+<         flag(p)=.true.
+<         do k=1, 7
+<           y = sum(lai_opt_grass_RunningRecord(k,:,:)) / DivedG / DivedG
+<           if (y > 0.01)                                      flag(p)=.false.
+<         enddo
+<        
+---
+> !ARAKIDA CHANGED FOR DA***************************************************************************
+> !       flag(p)=.true.
+> !       do k=1, 7
+> !         y = sum(lai_opt_grass_RunningRecord(k,:,:)) / DivedG / DivedG
+> !         if (y > 0.01)                                      flag(p)=.false.
+> !       enddo
+>        if (doy >= Dor_g)                                     flag(p)=.true. 
+> !ARAKIDA CHANGED FOR DA***************************************************************************
+593,594c600,603
+<    if ( dfl_leaf_onset(p) < Days_foliation_min ) flag(p)=.false.
+<    
+---
+> !ARAKIDA DELATED FOR DA***************************************************************************
+> !       if ( dfl_leaf_onset(p) < Days_foliation_min ) flag(p)=.false.
+> !ARAKIDA DELATED FOR DA***************************************************************************
+> 
+675,676c684,688
+<        
+<        if ( x >= 65.0 )                                        flag(p) = .true. 
+---
+> 
+> !ARAKIDA CHANGED FOR DA***************************************************************************       
+> !       if ( x >= 65.0 )                                        flag(p) = .true. 
+>        if ( doy>=110)                                         flag(p) = .true. 
+> !ARAKIDA CHANGED FOR DA***************************************************************************
+678a691
+> 
+689,694c702,710
+<        flag(p)=.true.
+<        do k=1, 7
+<           y = sum(lai_opt_grass_RunningRecord(k,:,:)) / DivedG / DivedG
+<           if (y <= 0.01)                                    flag(p) = .false.
+<        enddo
+<        
+---
+> !ARAKIDA CHANGED FOR DA***************************************************************************
+> !       flag(p)=.true.
+> !       do k=1, 7
+> !          y = sum(lai_opt_grass_RunningRecord(k,:,:)) / DivedG / DivedG
+> !          if (y <= 0.01)                                    flag(p) = .false.
+> !       enddo
+>        if ( doy>=110 )                                      flag(p) = .true. 
+> !ARAKIDA CHANGED FOR DA***************************************************************************
+> 
+722,724c738,743
+<    
+< IF (dfl_leaf_onset(p) >= day_length_release) cycle
+<    
+---
+> 
+> !ARAKIDA CHANGED FOR DA (BUG FIX)*****************************************************************   
+> !IF (dfl_leaf_onset(p) >= day_length_release) cycle
+>  IF (dfl_leaf_onset(p) >= (day_length_release-1)) cycle
+> !ARAKIDA CHANGED FOR DA (BUG FIX)*****************************************************************
+>   
+735c754
+<           resp_trunk     (no) = resp_trunk    (no) + (x - x / RG_stock_out)
+---
+>           resp_trunk     (no) = resp_trunk    (no) + (x - x / RG_stock_out) 
+943,945c962,967
+<          mass_combust   = mass_combust  + mass_required
+<          npp(p)         = npp(p)        - mass_required
+<          
+---
+> !ARAKIDA CHANGED FOR DA (BUG FIX)***************************************************************** 
+> !         mass_combust   = mass_combust  + mass_required 
+> !         npp(p)         = npp(p)        - mass_required 
+>          mass_combust   = mass_combust  + mass_required * x 
+>          npp(p)         = npp(p)        - mass_required * x 
+> !ARAKIDA CHANGED FOR DA (BUG FIX)*****************************************************************         
+1199c1221
+<        a1 = max( 0.00000, mass_leaf(no) - mass_stock(no) )
+---
+>        a1 = max( 0.00000, mass_leaf(no) - mass_stock(no) ) 
+1550c1572
+<    
+---
+> 
+1552,1553c1574,1576
+<    integer,parameter::Delay_from_foliation = 21
+<    
+---
+>    !integer,parameter::Delay_from_foliation = 21
+>     integer,parameter::Delay_from_foliation = 0  !ARAKIDA CHANGED FOR DA (21->0)
+>         
+1605,1606c1628,1629
+<       resp_leaf     (no)= resp_leaf       (no)+ mass_available(no) * x * y 
+<       npp            (p)= npp              (p)- mass_available(no) * x * y 
+---
+>       resp_leaf     (no)= resp_leaf       (no)+ mass_available(no) * x * y  
+>       npp            (p)= npp              (p)- mass_available(no) * x * y  
+1616,1617c1639,1640
+<       resp_leaf     (no) = resp_leaf     (no) + mass_available(no) * x
+<       npp            (p) = npp            (p) - mass_available(no) * x
+---
+>       resp_leaf     (no) = resp_leaf     (no) + mass_available(no) * x 
+>       npp            (p) = npp            (p) - mass_available(no) * x 
+1624,1627c1647,1649
+<    y = x  / RG_s(p)       !y: increased trunk biomass (gDM/tree)
+<    
+<    resp_trunk    (no) = resp_trunk(no) + (x-y)
+<    npp            (p) = npp        (p) - (x-y)
+---
+>    y = x  / RG_s(p)       !y: increased trunk biomass (gDM/tree) 
+>    resp_trunk    (no) = resp_trunk(no) + (x-y) 
+>    npp            (p) = npp        (p) - (x-y) 
+1725,1726c1747,1752
+<    effect_tmp = exp( 308.56 * ( 1.0/66.02 - 1.0/( max(-45.0, x)+46.02) ) )
+<    
+---
+> 
+> !ARAKIDA APPLIED BUG FIX (REFERRED TO SEIB-DGVM VER.2.82)******************************************
+>   !effect_tmp = exp( 308.56 * ( 1.0/66.02 - 1.0/( max(-45.0, x)+46.02) ) )
+>    effect_tmp = exp( 308.56 * ( 1.0/56.02 - 1.0/( max(-45.0, x)+46.02) ) )
+> !ARAKIDA APPLIED BUG FIX (REFERRED TO SEIB-DGVM VER.2.82)******************************************
+> 
+1778c1804
+< END SUBROUTINE decomposition
+\ No newline at end of file
+---
+> END SUBROUTINE decomposition
+diff compared_code/seib_code271/code/modules.f90 seib271_pf200/scr/modules.f90
+7a8,10
+> !ARAKIDA ADDED FOR DA*****************************************************************************
+> integer,parameter::PFT_no_f  = 12   !Number of plant functional types for tree
+> !ARAKIDA ADDED FOR DA*****************************************************************************
+72a76,78
+> integer               ::Asim_span       !Assimilation span(day) !ARAKIDA ADDED FOR DA
+> integer               ::Sim_years1      !Spin up years          !ARAKIDA ADDED FOR DA
+> integer               ::Sim_years2      !w/DA or w/oDA years    !ARAKIDA ADDED FOR DA
+83a90,92
+> character*128::Fn_parameter !input parameter for da !ARAKIDA ADDED FOR DA
+> character*128::Fn_output    !outputs for da         !ARAKIDA ADDED FOR DA
+> character*128::Fn_lai       !simulated lai for da   !ARAKIDA ADDED FOR DA
+95a105
+> !ARAKIDA CHANGED THE SETTINGS FOR DA (SOME PARAMETERS: PFT_no->PFT_no_f)**************************
+100c110
+< real,dimension(PFT_no)::RG_s         !Specific growth respiration rate for stem    (g dm /g dm)
+---
+> real,dimension(PFT_no_f)::RG_s       !Specific growth respiration rate for stem    (g dm /g dm) 
+107c117
+< real,dimension(PFT_no)::TO_s !Fixed turn over time for Sapwood (yr-1)
+---
+> real,dimension(PFT_no_f)::TO_s !Fixed turn over time for Sapwood (yr-1) 
+111,121c121,131
+< real   ,dimension(PFT_no)::ALM1 !Allometry index of LA vs dbh_sapwood (m2/m)
+< real   ,dimension(PFT_no)::ALM2 !Allometry index of crown_area
+< real   ,dimension(PFT_no)::ALM3 !Allometry index of mass_trunk (g dm/ m3)
+< real   ,dimension(PFT_no)::ALM4 !Allometry index of crown adjustment (proportion)
+< real   ,dimension(PFT_no)::ALM5 !Allometry index, diameter proportion of sapwood
+< real   ,dimension(PFT_no)::ALM6 !Allometry index, crown depth fraction to tree height (fraction)
+< real   ,dimension(PFT_no)::DBH_limit !limitation on trunk diameter (m)
+< real   ,dimension(PFT_no)::HGT_max   !Maximum tree height (m)
+< real   ,dimension(PFT_no)::HGT_s     !Initial value of relative growth rate of height to dbh (m/m)
+< real   ,dimension(PFT_no)::CD_max    !Maximum crown diameter (m)
+< real   ,dimension(PFT_no)::LA_max    !Maximum leaf area per canopy surface (m2/ m2)
+---
+> real   ,dimension(PFT_no_f)::ALM1 !Allometry index of LA vs dbh_sapwood (m2/m)     
+> real   ,dimension(PFT_no_f)::ALM2 !Allometry index of crown_area                    
+> real   ,dimension(PFT_no_f)::ALM3 !Allometry index of mass_trunk (g dm/ m3)         
+> real   ,dimension(PFT_no_f)::ALM4 !Allometry index of crown adjustment (proportion) 
+> real   ,dimension(PFT_no_f)::ALM5 !Allometry index, diameter proportion of sapwood  
+> real   ,dimension(PFT_no_f)::ALM6 !Allometry index, crown depth fraction to tree height (fraction)
+> real   ,dimension(PFT_no_f)::DBH_limit !limitation on trunk diameter (m)
+> real   ,dimension(PFT_no_f)::HGT_max   !Maximum tree height (m)
+> real   ,dimension(PFT_no_f)::HGT_s     !Initial value of relative growth rate of height to dbh (m/m)
+> real   ,dimension(PFT_no_f)::CD_max    !Maximum crown diameter (m)
+> real   ,dimension(PFT_no_f)::LA_max    !Maximum leaf area per canopy surface (m2/ m2)
+126c136
+< real   ,dimension(PFT_no)::PN_s    !proportion of nitrogen:sapwood   (gN / gBiomass)
+---
+> real   ,dimension(PFT_no_f)::PN_s    !proportion of nitrogen:sapwood   (gN / gBiomass) 
+144,147c154,157
+< real   ,dimension(PFT_no)::M1        !Mortality; asymptotic maximum mortality rate
+< real   ,dimension(PFT_no)::M2        !Mortality; a parameter of back ground mortality
+< real   ,dimension(PFT_no)::M4        !Mortality; a parameter of back ground mortality
+< real   ,dimension(PFT_no)::M5        !Mortality; a parameter of back ground mortality
+---
+> real   ,dimension(PFT_no_f)::M1        !Mortality; asymptotic maximum mortality rate
+> real   ,dimension(PFT_no_f)::M2        !Mortality; a parameter of back ground mortality
+> real   ,dimension(PFT_no_f)::M4        !Mortality; a parameter of back ground mortality
+> real   ,dimension(PFT_no_f)::M5        !Mortality; a parameter of back ground mortality
+149c159
+< integer,dimension(PFT_no)::Heat_sensitive !Heat sensitive mortality (1:yes, 0:no)
+---
+> integer,dimension(PFT_no_f)::Heat_sensitive !Heat sensitive mortality (1:yes, 0:no) 
+152c162
+< real   ,dimension(PFT_no)::P_establish !Establishment probability in safe_site (year-1 m-2)
+---
+> real   ,dimension(PFT_no_f)::P_establish !Establishment probability in safe_site (year-1 m-2)
+154,157c164,167
+< real   ,dimension(PFT_no)::GDD_min  !Minimum degree-day sum (5 Celcius base) for establishment
+< real   ,dimension(PFT_no)::PAR_min  !Minimum midday PAR (micro mol photon m-2 s-1) to establish
+< integer,dimension(PFT_no)::DM_max   !Maximum drought month for establishment (month, 1-12)
+< real   ,dimension(PFT_no)::AGE_max  !Maximum age above which trees die (year)
+---
+> real   ,dimension(PFT_no_f)::GDD_min  !Minimum degree-day sum (5 Celcius base) for establishment
+> real   ,dimension(PFT_no_f)::PAR_min  !Minimum midday PAR (micro mol photon m-2 s-1) to establish
+> integer,dimension(PFT_no_f)::DM_max   !Maximum drought month for establishment (month, 1-12)
+> real   ,dimension(PFT_no_f)::AGE_max  !Maximum age above which trees die (year)
+170c180
+< logical,dimension(PFT_no)::Est_pft_OnOff   !for Scenario 1: establishment switch
+---
+> logical,dimension(PFT_no_f)::Est_pft_OnOff   !for Scenario 1: establishment switch
+176c186,188
+< real,dimension(PFT_no)::M3            !Fire resistance parameter for woody PFTs (no dimension)
+---
+> real,dimension(PFT_no_f)::M3            !Fire resistance parameter for woody PFTs (no dimension)
+> 
+> !ARAKIDA CHANGED THE SETTINGS FOR DA (SOME PARAMETERS: PFT_no->PFT_no_f)**************************
+187,220c199,259
+< !***********************  set NameList  *************************
+<     namelist /Control/        &
+<         Simulation_year, Flag_spinup_read, Flag_spinup_write, Flag_output_write, &
+<         Max_loc, Depth, STEP, &
+<         C_in_drymass, File_no, &
+<         Fn_climate, Fn_location, Fn_spnin, Fn_spnout
+<     
+<     namelist /PFT_type/       &
+<         Life_type, Phenology_type
+<     
+<     namelist /Respiration/    &
+<         RM, RG_f, RG_f_suck, RG_s, RG_r, RG_stock_in, RG_stock_out
+<     
+<     namelist /Turnover_n/       &
+<         TO_f,  TO_s,  TO_r
+<     
+<     namelist /Metabolic/      &
+<         ALM1, ALM2, ALM3, ALM4, ALM5, ALM6,&
+<         CD_max, LA_max, FR_ratio, RootDepth, DBH_limit, HGT_max, HGT_s, SLA, PN_f, PN_s, PN_r
+<     
+<     namelist /Assimilation/ &
+<         Pmax, EK0, Lue0, Topt0, Tmin, Tmax, &
+<         GS_b1, GS_b2, GS_b3, KM, CO2cmp0
+<     
+<     namelist /Dynamics/       &
+<         M1, M2, M4, M5, TC_min, Heat_sensitive, Heat_base, &
+<         P_establish, TC_max, GDD_min, PAR_min, DM_max, AGE_max, &
+<         Est_scenario, Est_year_change, Est_pft_OnOff, Est_frac_random
+<     
+<     namelist /Disturbance/    &
+<         Fuel_min, Moisture_extinction, M3
+<     
+<     namelist /Soil_resp/  &
+<         TO_litter, TO_fast, TO_slow, F_air, F_inter, F_resp, F_fast
+---
+> !ARAKIDA ADDED FOR DA*****************************************************************************
+> !Phenology
+> real,allocatable,dimension(:,:)::Parameterin !All Parameter input 
+> real, allocatable, dimension(:)::LAI_all !All LAI
+> real :: Fol_g               !Foliage date for grass
+> real :: Fol_f               !Foliage date for forest
+> real :: Dor_g               !Dormance date for grass
+> real :: Dor_f               !Dormance date for forest
+> integer seib_pf_switch      !1: for spinup, 2: for da or no da
+> integer :: num_ptl
+> integer :: days   
+> integer :: daout_counter
+> real, allocatable, dimension(:,:)::XY 
+> 
+> !MPI setting
+> integer :: IERR
+> integer :: NPROCS
+> integer :: MYRANK
+> integer :: MPI_LOOP
+> integer :: PT_NUM
+> 
+> !DA setting
+> integer, allocatable, dimension(:) :: noise_list 
+> !ARAKIDA ADDED FOR DA*****************************************************************************
+> 
+> !ARAKIDA DELATED FOR DA***************************************************************************
+> !!***********************  set NameList  *************************
+> !    namelist /Control/        &
+> !        Simulation_year, Flag_spinup_read, Flag_spinup_write, Flag_output_write, &
+> !        Max_loc, Depth, STEP, &
+> !        C_in_drymass, File_no, &
+> !        Fn_climate, Fn_location, Fn_spnin, Fn_spnout
+> !    
+> !    namelist /PFT_type/       &
+> !        Life_type, Phenology_type
+> !    
+> !    namelist /Respiration/    &
+> !        RM, RG_f, RG_f_suck, RG_s, RG_r, RG_stock_in, RG_stock_out
+> !    
+> !    namelist /Turnover_n/       &
+> !        TO_f,  TO_s,  TO_r
+> !    
+> !    namelist /Metabolic/      &
+> !        ALM1, ALM2, ALM3, ALM4, ALM5, ALM6,&
+> !        CD_max, LA_max, FR_ratio, RootDepth, DBH_limit, HGT_max, HGT_s, SLA, PN_f, PN_s, PN_r
+> !    
+> !    namelist /Assimilation/ &
+> !        Pmax, EK0, Lue0, Topt0, Tmin, Tmax, &
+> !        GS_b1, GS_b2, GS_b3, KM, CO2cmp0
+> !    
+> !    namelist /Dynamics/       &
+> !        M1, M2, M4, M5, TC_min, Heat_sensitive, Heat_base, &
+> !        P_establish, TC_max, GDD_min, PAR_min, DM_max, AGE_max, &
+> !        Est_scenario, Est_year_change, Est_pft_OnOff, Est_frac_random
+> !    
+> !    namelist /Disturbance/    &
+> !        Fuel_min, Moisture_extinction, M3
+> !    
+> !    namelist /Soil_resp/  &
+> !        TO_litter, TO_fast, TO_slow, F_air, F_inter, F_resp, F_fast
+> !ARAKIDA DELATED FOR DA***************************************************************************
+256c295
+<       !dbhだけの関数として幹重が決まるとした
+---
+>       !the weight of mass_trunk is determined only by DBH !ARAKIDA transrated because this text was garbled.
+295a335
+> 
+298a339
+> !S.Shima (ARAKIDA ET AL. 2017) CHANGED FOR RANDOM NUMBER ******************************************
+301,308c342,351
+<    !integer I_seed
+<    !I_seed = I_seed*48828125
+<    !if(I_seed.le.0) then
+<    !   I_seed = (I_seed+2147483647)+1
+<    !else
+<    !   I_seed = I_seed
+<    !end if
+<    !randf = float(I_seed)/2147483647
+---
+> !   integer I_seed
+> !   I_seed = I_seed*48828125
+> !   if(I_seed.le.0) then
+> !      I_seed = (I_seed+2147483647)+1
+> !   else
+> !      I_seed = I_seed
+> !   end if
+> !   randf = float(I_seed)/2147483647
+> !!$! Random Seed. Added by S.Shima
+> !!$  call init_random_seed()
+311a355,410
+> !S.Shima (ARAKIDA ET AL. 2017) CHANGED FOR RANDOM NUMBER ******************************************
+> 
+> ! Random Seed. ADDED BY S.Shima (ARAKIDA ET AL. 2017)**********************************************
+> ! https://gcc.gnu.org/onlinedocs/gfortran/RANDOM_005fSEED.html#RANDOM_005fSEED
+>           subroutine init_random_seed()
+>             use iso_fortran_env, only: int64
+>             implicit none
+>             integer, allocatable :: seed(:)
+>             integer :: i, n, un, istat, dt(8), pid, getpid
+>             integer(int64) :: t
+>           
+>             call random_seed(size = n)
+>             allocate(seed(n))
+>             ! First try if the OS provides a random number generator
+>             open(newunit=un, file="/dev/urandom", access="stream", &
+>                  form="unformatted", action="read", status="old", iostat=istat)
+>             if (istat == 0) then
+>                read(un) seed
+>                close(un)
+>             else
+>                ! Fallback to XOR:ing the current time and pid. The PID is
+>                ! useful in case one launches multiple instances of the same
+>                ! program in parallel.
+>                call system_clock(t)
+>                if (t == 0) then
+>                   call date_and_time(values=dt)
+>                   t = (dt(1) - 1970) * 365_int64 * 24 * 60 * 60 * 1000 &
+>                        + dt(2) * 31_int64 * 24 * 60 * 60 * 1000 &
+>                        + dt(3) * 24_int64 * 60 * 60 * 1000 &
+>                        + dt(5) * 60 * 60 * 1000 &
+>                        + dt(6) * 60 * 1000 + dt(7) * 1000 &
+>                        + dt(8)
+>                end if
+>                pid = getpid()
+>                t = ieor(t, int(pid, kind(t)))
+>                do i = 1, n
+>                   seed(i) = lcg(t)
+>                end do
+>             end if
+>             call random_seed(put=seed)
+>           contains
+>             ! This simple PRNG might not be good enough for real work, but is
+>             ! sufficient for seeding a better PRNG.
+>             function lcg(s)
+>               integer :: lcg
+>               integer(int64) :: s
+>               if (s == 0) then
+>                  s = 104729
+>               else
+>                  s = mod(s, 4294967296_int64)
+>               end if
+>               s = mod(s * 279470273_int64, 4294967291_int64)
+>               lcg = int(mod(s, int(huge(0), int64)), kind(0))
+>             end function lcg
+>           end subroutine init_random_seed
+> ! Random Seed. ADDED BY S.Shima (ARAKIDA ET AL. 2017)**********************************************
+316a416
+> 
+329c429,438
+< END MODULE time_counter
+---
+>    integer laicounter    !ARAKIDA ADDED FOR DA 
+>    integer year_climate  !ARAKIDA MOVED FROM "modules.f90" FOR DA 
+>    integer datloop       !data assimilaton loop     !ARAKIDA ADDED FOR DA
+>    integer, allocatable ::seed(:)                   !ARAKIDA ADDED FOR RANDOM NUMBER
+>    integer randomnumber  !counter for random number !ARAKIDA ADDED FOR RANDOM NUMBER (BUT NOT USED)
+> 
+> !Outputs 
+> real, dimension(36)::binaryout    !ARAKIDA ADDED FOR DA
+> 
+> END MODULE time_counter 
+334d442
+<    
+348a457
+>    real   ,dimension(PFT_no)::lainow         !LAI output for Particle Filter !ARAKIDA ADDED FOR DA
+396c505,506
+<    
+---
+> 
+>   
+553a664,847
+> 
+> !ARAKIDA ADDED FOR DA*****************************************************************************
+> MODULE spinin_data
+>   USE data_structure
+>   type spinin_set
+>    integer doy            !day of the year (1-Day_in_Year)
+>    integer year           !loop counter for year (1-Simulation_year)
+>    integer year_climate   !ARAKIDA MOVED FROM "modules.f90" FOR DA
+>    integer counter        !counter number of present day
+>    integer randomnumber   !counter for random number !ARAKIDA ADDED FOR RANDOM NUMBER (BUT NOT USED)
+> !Variables for whole vegetation
+>    integer biome          !biome type (Definition ->subroutine biome_type)
+>    real    lai_max        !Total LAI @ annual maximum (reset@doy1) (m2/m2)
+>    real    lai_max_wood   !Wood  LAI @ annual maximum (reset@doy1) (m2/m2)
+>    real    lai_max_grass  !Grass LAI @ annual maximum (reset@doy1) (m2/m2)
+>    real    lai_mean_wood  !Wood  LAI @ annual mean    (reset@doy1) (m2/m2)
+>    real    lai_mean_grass !Grass LAI @ annual mean    (reset@doy1) (m2/m2)  
+> !Variables for each PFT
+>    logical,dimension(PFT_no)::phenology      !Phenological status (T:foliation, F:dormance)
+>    logical,dimension(PFT_no)::pft_exist      !flag: PFT exist or not
+>    integer,dimension(PFT_no)::dfl_leaf_onset !day from last leaf onset
+>    integer,dimension(PFT_no)::dfl_leaf_shed  !counter number of last leaf shedding
+>    real   ,dimension(PFT_no)::stat_water     !state of water satisfactory (0.0-1.0)
+> !Variables for for each individual tree
+>    logical,dimension(Max_no)::tree_exist     !tree exist flag
+>    integer,dimension(Max_no)::pft            !Plant Functional Type
+>    integer,dimension(Max_no)::age            !tree age (year)
+>    integer,dimension(Max_no)::height         !tree height from 1.3m above ground (STEP)
+>    integer,dimension(Max_no)::bole           !bole length from 1.3m above ground (STEP)
+>    integer,dimension(Max_no)::height_limit   !maximum tree height that proximate trees permit(step)
+>    integer,dimension(Max_no)::flag_suppress  
+>    real   ,dimension(Max_no)::dbh_heartwood  !heartwood diameter at 1.3m (m)
+>    real   ,dimension(Max_no)::dbh_sapwood    !sapwood   diameter at 1.3m (m)
+>    real   ,dimension(Max_no)::crown_diameter !crown diameter      (m)
+>    real   ,dimension(Max_no)::crown_area     !crown area          (m2)
+>    real   ,dimension(Max_no)::bole_x         !x_location of bole  (m)
+>    real   ,dimension(Max_no)::bole_y         !y_location of bole  (m)
+>    real   ,dimension(Max_no)::crown_x        !x_location of crown (m)
+>    real   ,dimension(Max_no)::crown_y        !y_location of crown (m)
+>    real   ,dimension(Max_no)::radius_limit   !maximum canopy radius that proximate trees permit (m)
+>    real   ,dimension(Max_no)::la             !leaf area           (m2)
+>    real   ,dimension(Max_no)::mass_leaf      !biomass of foliage  (gDM/tree)
+>    real   ,dimension(Max_no)::mass_trunk     !biomass of trunk    (gDM/tree)
+>    real   ,dimension(Max_no)::mass_root      !biomass of fine root(gDM/tree)
+>    real   ,dimension(Max_no)::mass_stock     !biomass for stock   (gDM/tree)
+>    real   ,dimension(Max_no)::mass_available !biomass available   (gDM/tree)
+>    real   ,dimension(Max_no)::mort_regu1               !sum of NPP within the previous year (gDM/tree)
+>    real   ,dimension(Max_no)::mort_regu2               !average leaf area of last year (m2)
+>    real   ,dimension(Max_no)::mort_regu4               !stem diameter increament in last year (m year-1)
+>    real   ,dimension(Max_no)   ::stat_leaf_crowntop    !annual sum of stat_leaf of the top CrownDisk
+>    real   ,dimension(Max_no,10)::stat_leaf_crownbottom !annual sum of stat_leaf of btm CrownDisks   
+> !Variables for each floor cell
+>    real,dimension(DivedG,DivedG):: gmass_leaf      !c3/c4 grass foliage   biomass (gDM/cell)
+>    real,dimension(DivedG,DivedG):: gmass_root      !c3/c4 grass root      biomass (gDM/cell)
+>    real,dimension(DivedG,DivedG):: gmass_available !c3/c4 grass available biomass (gDM/cell)
+>    real,dimension(DivedG,DivedG):: gmass_stock     !c3/c4 grass stock     biomass (gDM/cell)
+>    real,dimension(DivedG,DivedG):: lai_grass       !c3/c4 leaf area index of grass (m2/m2)   
+>    real,dimension(20,DivedG,DivedG)::lai_opt_grass_RunningRecord   
+> !Running Records of plant properties
+>    logical,dimension(Day_in_Year,PFT_no)::phenology_RunningRecord  !RR of Phenology Flag
+>    real   ,dimension(Day_in_Year,PFT_no)::npp_RunningRecord        !RR of NPP (g DM/ stand/ day)
+>    real   ,dimension(Day_in_Year,PFT_no)::gpp_RunningRecord        !RR of GPP (g DM/ stand/ day)
+>    real   ,dimension(Day_in_Year,PFT_no)::stat_water_RunningRecord !RR of Stat water   
+>    real,dimension(20,PFT_no)::mass_sum_RunningRecord !20yrs RR of biomass for each PFT (gDM/m2) 
+> !Constants, which are initialized at the beggining of each simulation run
+>    integer C3g_no       !PFT number of C3 grass
+>    integer C4g_no       !PFT number of C4 grass   
+> !Metabolic status
+>    real                    canopy_cond  !canopy conductance (mol H2O m-2 s-1)
+>    real,dimension(PFT_no)::eK       !light attenuation coefficient to sun direction, no dimension
+>    real,dimension(Max_no)::lue      !light use efficiency (mol CO2 mol photon-1)
+>    real,dimension(Max_no)::co2cmp   !CO2 compensation point (ppmv)
+>    real,dimension(Max_no)::psat     !light-saturated photosynthesis rate (micro mol CO2 m-2 s-1)
+>    real,dimension(Max_no)::stat_leaf_crownbottom_daily
+>                                     !daily stat_leaf on the bottom of CrownDisk   
+>    real,dimension(10)::lue_grass    !light use efficiency for each par intensity class (mol CO2 mol photon-1)
+>    real,dimension(10)::co2cmp_grass !CO2 compensation point for each par intensity class (ppmv)
+>    real,dimension(10)::psat_grass   !light-saturated photosynthesis rate for each par intensity class
+>                                     ! (micro mol CO2 m-2 s-1)      
+> !Carbon flux
+>    real,dimension(PFT_no)::gpp           !GPP for each pft (g dm / stand / day  )     (reset@everday)
+>    real,dimension(PFT_no)::npp           !NPP for each pft (g dm / stand / day  )     (reset@everday)
+>    real,dimension(Max_no)::gpp_daily_ind !GPP for each individual (g dm / tree / day) (reset@everday)   
+>    real,dimension(Max_no)::resp_trunk    !respiration of woody trunk       (gDM/tree/day)
+>    real,dimension(Max_no)::resp_leaf     !respiration of woody leaf        (gDM/tree/day)
+>    real,dimension(Max_no)::resp_root     !respiration of woody fine root   (gDM/tree/day)
+>    real                    resp_grass_ag !respiration of grass aboveground (gDM/stand/day)
+>    real                    resp_grass_bg !respiration of grass underground (gDM/stand/day)   
+>    !Litter flux
+>    real flux_litter_trunk !litter flux of woody trunk       (gDM/stand/day)
+>    real flux_litter_leaf  !litter flux of woody leaf        (gDM/stand/day)
+>    real flux_litter_root  !litter flux of woody fine root   (gDM/stand/day)
+>    real flux_litter_ag    !litter flux of grass aboveground (gDM/stand/day)
+>    real flux_litter_bg    !litter flux of grass underground (gDM/stand/day)   
+> !Patch status
+>    logical,dimension(Dived,Dived)::patch_vacant !safe site for establishment of woody PFTs 
+> !Varibles for whole vegetation
+>    integer dfl_fire    !day from last fire (day)
+>    integer fire_number !ccumlative fire intensity
+>    real tmp_coldest_20yr_ave !20yr running average of tmp_coldest_month (Celcius)
+>    real tmp_hottest_20yr_ave !20yr running average of tmp_hottest_month (Celcius)
+>    real gdd_20yr_ave         !20yr running average of growing-degree-day-sum
+>    real pool_litter_trunk    !litter pool in a stand (trunk of woody PFTs)         (gDM / stand)
+>    real pool_litter_leaf     !litter pool in a stand (leaves of woody PFTs)        (gDM / stand)
+>    real pool_litter_root     !litter pool in a stand (fine root of woody PFTs)     (gDM / stand)
+>    real pool_litter_ag       !litter pool in a stand (aboveground of grass)        (gDM / stand)
+>    real pool_litter_bg       !litter pool in a stand (belowground of grass)        (gDM / stand) 
+>    real pool_som_int         !pool of s.o.m. with intermediated decomposition rate (gDM / stand)
+>    real pool_som_slow        !pool of s.o.m. with slow decomposition rate          (gDM / stand)  
+>    real pool_fuel_standT !standing dead biomass of tree  leaves (for Africa extension)(gDM / stand)
+>    real pool_fuel_standG !standing dead biomass of grass leaves (for Africa extension)(gDM / stand)
+>    real,dimension(1:30):: pool_w    !soil water content of each soil layer (mm)
+>    real                   pool_snow !water equivalent snow depth (mm)
+> !Running Records for 20yrs
+>    real,dimension(20):: gdd_20yr_RunningRecord     !Growth Degree day
+>    real,dimension(20):: tmp_coldest_RunningRecord  !Coldest month temperature (Celcius)
+>    real,dimension(20):: tmp_hottest_RunningRecord  !Hottest month temperature (Celcius)
+>    real,dimension(20):: tmp_ave_GrassGrowth_RR     !average temperature of growth phase of grass (Celcius) 
+> !Running Records of Carbon Pool
+>    real,dimension(Day_in_Year):: pool_c_RR !1yr RR of total carbon pool in the virtual forest (Kg C / m2) 
+> !Running Records of Carbon Flux
+>    real,dimension(Day_in_Year):: flux_c_uptake_RR !carbon uptake   due to photosyhthesis            (gDM/day/stand)
+>    real,dimension(Day_in_Year):: flux_c_mnt_RR    !carbon emission due to maintenance   respiration (gDM/day/stand)
+>    real,dimension(Day_in_Year):: flux_c_gro_RR    !carbon emission due to growth        respiration (gDM/day/stand)
+>    real,dimension(Day_in_Year):: flux_c_htr_RR    !carbon emission due to heterotrophic respiration (gDM/day/stand)
+>    real,dimension(Day_in_Year):: flux_c_fir_RR    !carbon emission due to fire incident             (gDM/day/stand)  
+> !Running Records of Water Flux
+>    real,dimension(Day_in_Year):: flux_ro_RunningRecord !1yr RR runoff water      (mm)
+>    real,dimension(Day_in_Year):: flux_ic_RunningRecord !1yr RR interception water(mm)
+>    real,dimension(Day_in_Year):: flux_ev_RunningRecord !1yr RR evaporated water  (mm)
+>    real,dimension(Day_in_Year):: flux_tr_RunningRecord !1yr RR tranpirated water (mm)  
+> !Running Records of Environmental Factors
+>    real,dimension(Day_in_Year)::tmp_air_RunningRecord   !1yr RR (Celcius)
+>    real,dimension(Day_in_Year)::tmp_soil_RunningRecord  !1yr RR (Celcius), soil_tmp RR@top layer
+>    real,dimension(Day_in_Year)::prec_RunningRecord      !1yr RR (mm/day)
+>    real,dimension(Day_in_Year)::ev_pot_RunningRecord    !1yr RR of potential avapotranspiration (mm/day)
+>    real,dimension(Day_in_Year)::par_RunningRecord       !1yrs RR
+>    real,dimension(Day_in_Year)::pool_w1_RunningRecord   !1yr RR
+> !Physical status of air
+>    real co2atm      !ambient (canopy) CO2 concentration (ppmv)
+>    real ap          !air pressure (hPa)
+>    real vp          !vapour pressure (hPa)
+>    real vpd         !vapour pressure deficit (hPa)
+>    real dnsa        !density of air (kg m-3)
+>    real vp_sat      !saturation vapour pressure (hPa)
+>    real slope_vps   !slope of saturation vapour pressure related to tempertaure (hPa deg C-1)
+> !Physical status of radiation
+>    real sl_hgt      !solar hight at midday (degree)
+>    real dlen        !day length (hour)
+>    real rad         !global radiation over canopy (W/m2)
+>    real par         !photosynthetically active radiation of mid-day (micro mol photon m-2 s-1)
+>    real par_direct  !direct PAR on canopy top of mid-day (micro mol photon m-2 s-1)
+>    real par_diffuse !difussed PAR on canopy top of mid-day (micro mol photon m-2 s-1)
+>    real albedo_soil !soil surface albedo
+>    real albedo_veg  !vegetation area albedo
+>    real radnet_soil !soil surface net radiation, short wave (W m-2)
+>    real radnet_veg  !canopy net radiation, short wave (W m-2)
+>    real ir_tree     !radiation-interruption-coefficient by tree corwn
+>    real ir_grass    !radiation-interruption-coefficient by grass leaf
+>    real bowen_ratio !bowen ratio 
+> !Growing-degree-day-sum (reset on Jan 1)
+>    real gdd0      !0 Celcius base
+>    real gdd5      !5 Celcius base
+> !Relative PAR intensity (0.0-1.0)
+>    real,dimension(Max_no,Max_hgt)::par_direct_rel  !direct PAR for each CrownDisk
+>    real,dimension(Max_hgt)       ::par_diffuse_rel !diffused PAR intensity for each forest layer
+>    real,dimension(Dived ,Dived ) ::par_floor_rel   !total PAR on each estaclishment cell of forest floor
+>    real,dimension(DivedG,DivedG) ::par_grass_rel   !total PAR on each grass         cell of forest floor
+> !1yr sum of PAR intensity for establishment cells
+>    real,dimension(Dived, Dived)::sum_par_floor  
+> !Fraction of crown coverage
+>    real frac_crown_coverage
+>  end type spinin_set
+>  type(spinin_set), allocatable::spin(:)
+>  type(spinin_set), allocatable::spin2(:)
+> 
+> END MODULE spinin_data
+> 
+> !ARAKIDA ADDED FOR DA*****************************************************************************
+> 
+> 
+> 
+> 
+> 
+Only in compared_code/seib_code271/code/: mpi
+diff compared_code/seib_code271/code/output.f90 seib271_pf200/scr/output.f90
+361c361,362
+< SUBROUTINE output_annual (Fn)
+---
+> !SUBROUTINE output_annual (Fn)
+> SUBROUTINE output_annual !ARAKIDA DELETED "Fn" FOR DA
+373c374
+<    integer,intent(IN)::Fn   !File I/O number
+---
+> !  integer,intent(IN)::Fn   !File I/O number !ARAKIDA DELETED FOR DA
+379a381
+>    real    mass_grass_root!grass root biomass (g C / m2) !ARAKIDA ADDED FOR ABOVE GROUND BIOMASS
+414a417
+>    mass_grass_root = sum(gmass_root(:,:)) !ARAKIDA ADDED FOR ABOVE GROUND BIOMASS
+427,446c430,465
+<    write (Fn,'(2(f7.1,a), 2(f9.3,a), 5(f6.1,a), 3(f5.1,a), 4(f5.1,a), 1(f6.2,a), 1(f6.1,a), 1(i3))') &
+<    tree_counter * ( (100.0/Max_loc)**2 )     , ',', & !Tree density (ha-1)
+<    height_mean                               , ',', & !Mean tree height (m)
+<    dbh_mean                                  , ',', & !Mean DBH   (m)
+<    ba                                        , ',', & !Basal area (cm2 m-2) (m2 ha-1)
+<    mass_wood1                     * unit_conv, ',', & !Total woody biomass (MgC ha-1)
+<    mass_wood2                     * unit_conv, ',', & !Above ground woody biomass (MgC ha-1)
+<    mass_grass                     * unit_conv, ',', & !Total grass biomass (MgC ha-1)
+<    pool_litter                    * unit_conv, ',', & !Litter carbon       (MgC ha-1)
+<    (pool_som_int + pool_som_slow) * unit_conv, ',', & !SOM carbon          (MgC ha-1)
+<    sum(gpp_RunningRecord (:,:))   * unit_conv, ',', & !GPP                 (MgC ha-1 yr-1)
+<    sum(npp_RunningRecord (:,:))   * unit_conv, ',', & !NPP                 (MgC ha-1 yr-1)
+<    nee                            * unit_conv, ',', & !NEE                 (MgC ha-1 yr-1)
+<    lai_max_wood                              , ',', & !
+<    lai_max_grass                             , ',', & !
+<    lai_mean_wood                             , ',', & !
+<    lai_mean_grass                            , ',', & !
+<    canopy_cond                               , ',', & !Canopy conductance
+<    sum(flux_ic_RunningRecord(:))              , ',', & !Runoff (mm year-1)
+<    biome                                              !Biome type
+---
+> !ARAKIDA DELETED FOR DA *************************************************************************** 
+> !   write (Fn,'(2(f7.1,a), 2(f9.3,a), 5(f6.1,a), 3(f5.1,a), 4(f5.1,a), 1(f6.2,a), 1(f6.1,a), 1(i3))') &
+> !   tree_counter * ( (100.0/Max_loc)**2 )     , ',', & !Tree density (ha-1)
+> !   height_mean                               , ',', & !Mean tree height (m)
+> !   dbh_mean                                  , ',', & !Mean DBH   (m)
+> !   ba                                        , ',', & !Basal area (cm2 m-2) (m2 ha-1)
+> !   mass_wood1                     * unit_conv, ',', & !Total woody biomass (MgC ha-1)
+> !   mass_wood2                     * unit_conv, ',', & !Above ground woody biomass (MgC ha-1)
+> !   mass_grass                     * unit_conv, ',', & !Total grass biomass (MgC ha-1)
+> !   pool_litter                    * unit_conv, ',', & !Litter carbon       (MgC ha-1)
+> !   (pool_som_int + pool_som_slow) * unit_conv, ',', & !SOM carbon          (MgC ha-1)
+> !   sum(gpp_RunningRecord (:,:))   * unit_conv, ',', & !GPP                 (MgC ha-1 yr-1)
+> !   sum(npp_RunningRecord (:,:))   * unit_conv, ',', & !NPP                 (MgC ha-1 yr-1)
+> !   nee                            * unit_conv, ',', & !NEE                 (MgC ha-1 yr-1)
+> !   lai_max_wood                              , ',', & !
+> !   lai_max_grass                             , ',', & !
+> !   lai_mean_wood                             , ',', & !
+> !   lai_mean_grass                            , ',', & !
+> !   canopy_cond                               , ',', & !Canopy conductance
+> !   sum(flux_ic_RunningRecord(:))              , ',', & !Runoff (mm year-1)
+> !   biome                                              !Biome type
+> !ARAKIDA DELETED FOR DA *************************************************************************** 
+> 
+> !ARAKIDA ADDED FOR DA ***************************************************************************** 
+>    binaryout(1)=tree_counter * ( (100.0/Max_loc)**2 )
+>    binaryout(2)=height_mean
+>    binaryout(3)=dbh_mean
+>    binaryout(4)=ba
+>    binaryout(5)=mass_wood1 * unit_conv
+>    binaryout(6)=mass_wood2 * unit_conv
+>    binaryout(7)=mass_grass * unit_conv
+>    binaryout(31)=mass_grass_root * unit_conv
+>    binaryout(8)=pool_litter * unit_conv
+>    binaryout(9)=(pool_som_int + pool_som_slow) * unit_conv
+>    binaryout(10)=canopy_cond 
+> !ARAKIDA ADDED FOR DA ***************************************************************************** 
+606c625,626
+< SUBROUTINE output_netradiation (Fn)
+---
+> !SUBROUTINE output_netradiation (Fn)
+> SUBROUTINE output_netradiation !ARAKIDA DELETED "Fn" FOR DA
+616,617c636,638
+<    integer,intent(IN)::Fn   !File I/O number
+<    
+---
+> !   integer,intent(IN)::Fn   !File I/O number !ARAKIDA DELETED "Fn" FOR DA
+> !   
+> !ARAKIDA DELETED FOR DA ***************************************************************************  
+620,624c641,644
+<    if (year == 1 .and. doy==1) then
+<    write (Fn,*) &
+<    ' Yr doy  s_alb  v_alb  radnet_soil radnet_veg Bowen_ratio'
+<    end if
+<    
+---
+> !   if (year == 1 .and. doy==1) then
+> !   write (Fn,*) &
+> !   ' Yr doy  s_alb  v_alb  radnet_soil radnet_veg Bowen_ratio'
+> !   end if
+626,628c646,654
+<    write (Fn,'(2i4, 2f7.2, 2f10.1, f10.2)') &
+<    year, doy, albedo_soil, albedo_veg, radnet_soil, radnet_veg, bowen_ratio
+<    
+---
+> !   write (Fn,'(2i4, 2f7.2, 2f10.1, f10.2)') &
+> !   year, doy, albedo_soil, albedo_veg, radnet_soil, radnet_veg, bowen_ratio
+> !ARAKIDA DELETED FOR DA *************************************************************************** 
+> 
+> !ARAKIDA ADDED FOR DA ***************************************************************************** 
+>    binaryout(11)=albedo_soil
+>    binaryout(12)=albedo_veg
+> !ARAKIDA ADDED FOR DA ***************************************************************************** 
+> 
+636c662,663
+< SUBROUTINE output_water (Fn, W_fi, W_wilt, W_sat)
+---
+> !SUBROUTINE output_water (Fn, W_fi, W_wilt, W_sat)
+> SUBROUTINE output_water (W_fi, W_wilt, W_sat) !ARAKIDA DELETED "Fn" FOR DA
+645c672
+<    integer,intent(IN)::Fn   !File I/O number
+---
+> !   integer,intent(IN)::Fn   !File I/O number !ARAKIDA DELETED "Fn" FOR DA
+667,676c694,712
+< !Write title
+<    if (year == 1 .and. doy==1) then
+<    write (Fn,*) &
+<    'Yr doy   snow   pool_w1   pool_w2  stat_w1   stat_w2'
+<    end if
+<    
+< !Write data
+<    write (Fn,'(2i4, 5f10.2, 2f10.3)') &
+<    year, doy, pool_snow, sum(pool_w(1:5))/5.0, sum(pool_w(6:15))/10.0, a1, a2
+<    
+---
+> !ARAKIDA DELETED FOR DA *************************************************************************** 
+> !!Write title
+> !   if (year == 1 .and. doy==1) then
+> !   write (Fn,*) &
+> !   'Yr doy   snow   pool_w1   pool_w2  stat_w1   stat_w2'
+> !   end if
+> ! 
+> !!Write data
+> !   write (Fn,'(2i4, 5f10.2, 2f10.3)') &
+> !   year, doy, pool_snow, sum(pool_w(1:5))/5.0, sum(pool_w(6:15))/10.0, a1, a2
+> !ARAKIDA DELETED FOR DA *************************************************************************** 
+> 
+> !ARAKIDA ADDED FOR DA ***************************************************************************** 
+>    binaryout(13)=pool_snow
+>    binaryout(14)=sum(pool_w(1:5))/5.0
+>    binaryout(15)=sum(pool_w(6:15))/10.0
+> !ARAKIDA ADDED FOR DA ***************************************************************************** 
+> 
+> 
+684c720,721
+< SUBROUTINE output_cflux (Fn)
+---
+> !SUBROUTINE output_cflux (Fn)
+> SUBROUTINE output_cflux !ARAKIDA DELETED "Fn" FOR DA
+695,697c732,734
+< !Arguments
+<    integer,intent(IN)::Fn   !File I/O number
+<    
+---
+> !Arguments 
+>    !integer,intent(IN)::Fn  !File I/O number !ARAKIDA DELETED "Fn" FOR DA
+>   
+699a737,738
+>    real r_out     !ARAKIDA ADDED FOR DA
+>    real re_out    !ARAKIDA ADDED FOR DA
+709,731c748,788
+<    
+< !Write data, all units except time counter are (Mg C/day/ha)
+<    write (Fn,'( i4, a, i3, 17(a, f8.5) )')      & 
+<       year                                     ,',', & !Year
+<       doy                                      ,',', & !doy
+<       flux_c_uptake_RR(1)          * unit_conv ,',', & !carbon uptake  
+<       flux_c_mnt_RR(1)             * unit_conv ,',', & !carbon emission due to maintenance  respiration
+<       flux_c_gro_RR(1)             * unit_conv ,',', & !carbon emission due to growth       respiration
+<       flux_c_htr_RR(1)             * unit_conv ,',', & !carbon emission due to heterotropic respiration
+<       flux_c_fir_RR(1)             * unit_conv ,',', & !carbon emission due to fire incident
+<       sum(gpp_RunningRecord (1,:)) * unit_conv ,',', & !GPP
+<       sum(npp_RunningRecord (1,:)) * unit_conv ,',', & !NPP
+<       sum(resp_trunk(:))           * unit_conv ,',', & !respiration of woody trunk      
+<       sum(resp_leaf (:))           * unit_conv ,',', & !respiration of woody leaf       
+<       sum(resp_root (:))           * unit_conv ,',', & !respiration of woody fine root  
+<       resp_grass_ag                * unit_conv ,',', & !respiration of grass aboveground
+<       resp_grass_bg                * unit_conv ,',', & !respiration of grass underground
+<       flux_litter_trunk            * unit_conv ,',', & !litter flux of woody trunk      
+<       flux_litter_leaf             * unit_conv ,',', & !litter flux of woody leaf       
+<       flux_litter_root             * unit_conv ,',', & !litter flux of woody fine root  
+<       flux_litter_ag               * unit_conv ,',', & !litter flux of grass aboveground
+<       flux_litter_bg               * unit_conv         !litter flux of grass underground
+<       
+---
+>  
+> !ARAKIDA DELETED FOR DA ***************************************************************************   
+> !!Write data, all units except time counter are (Mg C/day/ha)
+> !    write (Fn,'( i4, a, i3, 17(a, f8.5) )')      &  
+> !      year                                     ,' ', & !Year
+> !      doy                                      ,' ', & !doy
+> !      flux_c_uptake_RR(1)          * unit_conv ,' ', & !carbon uptake  
+> !      flux_c_mnt_RR(1)             * unit_conv ,' ', & !carbon emission due to maintenance  respiration
+> !      flux_c_gro_RR(1)             * unit_conv ,' ', & !carbon emission due to growth       respiration
+> !      flux_c_htr_RR(1)             * unit_conv ,' ', & !carbon emission due to heterotropic respiration
+> !      flux_c_fir_RR(1)             * unit_conv ,' ', & !carbon emission due to fire incident
+> !      sum(gpp_RunningRecord (1,:)) * unit_conv ,' ', & !GPP
+> !      sum(npp_RunningRecord (1,:)) * unit_conv ,' ', & !NPP
+> !      sum(resp_trunk(:))           * unit_conv ,' ', & !respiration of woody trunk      
+> !      sum(resp_leaf (:))           * unit_conv ,' ', & !respiration of woody leaf       
+> !      sum(resp_root (:))           * unit_conv ,' ', & !respiration of woody fine root  
+> !      resp_grass_ag                * unit_conv ,' ', & !respiration of grass aboveground
+> !      resp_grass_bg                * unit_conv ,' ', & !respiration of grass underground
+> !      flux_litter_trunk            * unit_conv ,' ', & !litter flux of woody trunk      
+> !      flux_litter_leaf             * unit_conv ,' ', & !litter flux of woody leaf       
+> !      flux_litter_root             * unit_conv ,' ', & !litter flux of woody fine root  
+> !      flux_litter_ag               * unit_conv ,' ', & !litter flux of grass aboveground
+> !      flux_litter_bg               * unit_conv         !litter flux of grass underground
+> !ARAKIDA DELETED FOR DA *************************************************************************** 
+> 
+> !ARAKIDA ADDED FOR DA ***************************************************************************** 
+>    r_out=flux_c_mnt_RR(1)+flux_c_gro_RR(1)
+>    re_out=flux_c_mnt_RR(1)+flux_c_gro_RR(1)+flux_c_htr_RR(1)
+> 
+>    binaryout(16)=flux_c_uptake_RR(1) * unit_conv !GPP
+>    binaryout(17)=(flux_c_uptake_RR(1)-r_out) * unit_conv !NPP
+>    binaryout(18)=r_out * unit_conv !R
+>    binaryout(19)=(flux_c_uptake_RR(1)-re_out) * unit_conv !NEE
+>    binaryout(20)=re_out * unit_conv  !RE
+>    binaryout(32)=flux_litter_trunk            * unit_conv !litter flux of woody trunk      
+>    binaryout(33)=flux_litter_leaf             * unit_conv !litter flux of woody leaf       
+>    binaryout(34)=flux_litter_root             * unit_conv !litter flux of woody fine root  
+>    binaryout(35)=flux_litter_ag               * unit_conv !litter flux of grass aboveground
+>    binaryout(36)=flux_litter_bg               * unit_conv !litter flux of grass underground
+> !ARAKIDA ADDED FOR DA ***************************************************************************** 
+>      
+739c796,797
+< SUBROUTINE output_wflux (Fn, prec)
+---
+> !SUBROUTINE output_wflux (Fn, prec) 
+> SUBROUTINE output_wflux (prec) !ARAKIDA DELETED "Fn" FOR DA
+750c808
+<    integer,intent(IN)::Fn   !File I/O number
+---
+> !   integer,intent(IN)::Fn   !File I/O number !ARAKIDA DELETED "Fn" FOR DA
+766,781c824,853
+< !Write title
+<    !prec, RO, IC, EV, TR -> mm/day
+<    !Sensible heat, Latent heat -> MJ/m2.day
+<    if (year == 1 .and. doy==1) then
+<       write (Fn,*) 'Yr, doy, prec, RO, IC, EV, TR, Sensible heat, Latent heat'
+<    end if
+<    
+< !Write data
+<    !0.0018: = 0.0036 (Wh -> MJ) * 0.5 (mid-day value -> day time average)
+<    write (Fn,'( i5, a, i3, 5(a,f8.2), 2(a,f8.3) )') &
+<    year,',', doy,',', prec,',', &
+<    flux_ro_RunningRecord(1), ',', flux_ic_RunningRecord(1), ',', &
+<    flux_ev_RunningRecord(1), ',', flux_tr_RunningRecord(1), ',', &
+<    0.0018*dlen*(radnet_veg+radnet_soil) - lh*aet     , ',', &
+<    lh*aet                                                    
+<    
+---
+> 
+> !ARAKIDA DELETED FOR DA ***************************************************************************   
+> !!Write title
+> !   !prec, RO, IC, EV, TR -> mm/day
+> !   !Sensible heat, Latent heat -> MJ/m2.day
+> !   if (year == 1 .and. doy==1) then
+> !      write (Fn,*) 'Yr, doy, prec, RO, IC, EV, TR, Sensible heat, Latent heat'
+> !   end if
+> !
+> !!Write data
+> !   !0.0018: = 0.0036 (Wh -> MJ) * 0.5 (mid-day value -> day time average)
+> !   write (Fn,'( i5, a, i3, 5(a,f8.2), 2(a,f8.3) )') &
+> !   year,',', doy,',', prec,',', &
+> !   flux_ro_RunningRecord(1), ',', flux_ic_RunningRecord(1), ',', &
+> !   flux_ev_RunningRecord(1), ',', flux_tr_RunningRecord(1), ',', &
+> !   0.0018*dlen*(radnet_veg+radnet_soil) - lh*aet     , ',', &
+> !   lh*aet                                                    
+> !ARAKIDA DELETED FOR DA *************************************************************************** 
+> 
+> !ARAKIDA ADDED FOR DA ***************************************************************************** 
+>    binaryout(21)=flux_ro_RunningRecord(1)
+>    binaryout(22)=flux_ic_RunningRecord(1)
+>    binaryout(23)=flux_ev_RunningRecord(1)
+>    binaryout(24)=flux_tr_RunningRecord(1)
+>    binaryout(25)=0.0018*dlen*(radnet_veg+radnet_soil) - lh*aet
+>    binaryout(26)=lh*aet
+>    binaryout(27)=radnet_veg
+>    binaryout(28)=radnet_soil
+> !ARAKIDA ADDED FOR DA ***************************************************************************** 
+> 
+790c862
+< !出力するPFTに応じて、コードを変更する必要があります
+---
+> ! Code is needed to change depending on which PFT is outputed !this text was garbled, transrated by ARAKIDA
+957,958c1029,1031
+<    write (Fn,'( '//string//'(f6.2,1x) )') biomass(:)
+<    
+---
+>    write (Fn,'( '//string//'(f6.2,1x) )') biomass(:) 
+>  
+>   
+966c1039,1040
+< SUBROUTINE output_lai(Fn)
+---
+> !SUBROUTINE output_lai(Fn)
+> SUBROUTINE output_lai(lai) !ARAKIDA DELETED "Fn" FOR DA
+970a1045
+>    USE time_counter        !ARAKIDA ADDED FOR DA
+975,976c1050,1052
+< !Arguments
+<    integer,intent(IN)::Fn   !File I/O number
+---
+> !Arguments 
+>    !integer,intent(IN)::Fn   !File I/O number !ARAKIDA DELETED "Fn" FOR DA
+>    real,dimension(PFT_no),intent(OUT)::lai    !ARAKIDA ADDED FOR DA
+979c1055
+<    real,dimension(PFT_no)::lai     !lai for each PFT (g C / m2)
+---
+>    !real,dimension(PFT_no)::lai     !lai for each PFT (g C / m2) !ARAKIDA DELETED FOR DA
+1012,1015c1088,1098
+<    
+< !Write title and data
+<    write (Fn,'( '//string//'(f4.1,1x) )') lai(:)
+<    
+---
+> 
+> !ARAKIDA DELETED FOR DA ***************************************************************************   
+> !!Write title and data
+> !   write (Fn,'( '//string//'(f8.6,1x) )') lai(:) 
+> !ARAKIDA DELETED FOR DA ***************************************************************************
+> 
+> !ARAKIDA ADDED FOR DA *****************************************************************************
+>    binaryout(29)=lai(11)
+>    binaryout(30)=lai(13)
+> !ARAKIDA ADDED FOR DA *****************************************************************************
+> 
+Only in compared_code/seib_code271/code/: parameter.txt
+diff compared_code/seib_code271/code/physics.f90 seib271_pf200/scr/physics.f90
+261c261,264
+<    lh = 2259 + 4.2 * (100-tmp_air)
+---
+> !ARAKIDA APPLIED BUG FIX (REFERRED TO SEIB-DGVM VER.2.82) *****************************************
+>         !lh = 2259 + 4.2 * (100-tmp_air)
+>          lh = 2500.25 - 2.365 * tmp_air
+> !ARAKIDA APPLIED BUG FIX (REFERRED TO SEIB-DGVM VER.2.82) *****************************************
+diff compared_code/seib_code271/code/population_regu.f90 seib271_pf200/scr/population_regu.f90
+97c97
+<       if ( Life_type(p)==2 .and. dfl_fire>50*365     ) then; est_capacity(p)=.false. ;endif
+---
+>       if ( Life_type(p)==2 .and. dfl_fire>50*365     ) then; est_capacity(p)=.false. ;endif 
+224,225c224,231
+<    
+<    !determine new sapling ID-number
+---
+> 
+> !ARAKIDA APPLIED BUG FIX (REFERRED TO SEIB-DGVM VER.2.82) *****************************************
+> !   !determine new sapling ID-number
+> !   do while ( tree_exist(new) )
+> !      new = new + 1
+> !   end do
+> !   if ( new > Max_no ) return
+> 
+227a234
+>       if ( new > Max_no ) return
+229c236
+<    if ( new > Max_no ) return
+---
+> !ARAKIDA APPLIED BUG FIX (REFERRED TO SEIB-DGVM VER.2.82) *****************************************
+940c947
+< !      !crown_area(no)の代わりに、ポテンシャルの樹冠断面面積を使った
+---
+> !      !cross-sectional area of potential crown is used instead of crown_area(no) !ARAKIDA TRANSRATED (THE TEXTS ARE GARBLED)
+1011c1018
+<    
+---
+>   
+diff compared_code/seib_code271/code/spatial_calc.f90 seib271_pf200/scr/spatial_calc.f90
+418c418
+<       !Compute self shading for each crown layer (iは相対高度、jは絶対高度)
+---
+>       !Compute self shading for each crown layer (i is relative height, j is absolute height: this text is garbled. transrated by ARAKIDA)
+diff compared_code/seib_code271/code/start_point.f90 seib271_pf200/scr/start_point.f90
+14c14,15
+<    
+---
+> 
+> !ARAKIDA SEPARATED "start_point" TO "start_point" (MPI SETTINGS) AND "main_program" (ORIGIAL SEIB-DGVM AND DA)   
+20a22,94
+>    Include 'mpif.h' !ARAKIDA ADDED FOR MPI
+> 
+> !ARAKIDA ADDED FOR MPI ***************************************************************************
+>    integer:: num_sites                  !sites number for parallel simulation     
+>    integer:: site_start                 !starting site
+>    integer:: site_end                   !ending site
+>    integer, parameter:: total_data=856  !total study sites. ** It should be changed if the number is changed. **
+>    integer:: SITE_NUM                   !site number which is culculated now
+>    integer:: i, loop_n
+>    integer:: forcing_flag               !this flag can be used to skip simulation (e.g. forcing climate is missing) 
+>    character :: filename0*128
+>    
+> 
+> !READ location data 
+>    allocate(XY(total_data,4) ) 
+>    open (21, file="studysites.csv")
+>    read (21, '()')
+>    do i = 1, total_data
+>    read (21, *) XY(i,1:4)
+>    end do
+>    close(21)
+> 
+> 
+> !READ start and end site
+>    open (21, file="site_start.txt")
+>    read (21, *) site_start
+>    close(21)
+>    open (21, file="site_end.txt")
+>    read (21, *) site_end
+>    close(21)
+>    num_sites=site_end-site_start+1
+> 
+> !For MPI initialize
+>    call MPI_INIT(IERR)
+>    call MPI_COMM_SIZE(MPI_COMM_WORLD,NPROCS,IERR)
+>    call MPI_COMM_RANK(MPI_COMM_WORLD,MYRANK,IERR)
+> 
+> !MPI LOOP
+>    loop_n=num_sites/NPROCS
+>    do i=1, loop_n
+>      SITE_NUM=site_start+NPROCS*(i-1)+MYRANK
+>      write (*,*) 'NPROCS=', NPROCS, 'MYRANK=',MYRANK, 'SITE_NUM=',SITE_NUM
+> 
+>      !READ forcing flag
+>      write(filename0, '("../",i6.6,"/forcing_flag.txt")') SITE_NUM
+>      open (21, file=filename0)
+>      read (21, *) forcing_flag
+>      close(21)
+> 
+>      if (forcing_flag==1)then
+>        Call main_program(SITE_NUM)
+>      else
+>        write (*,*) 'SITE_NUM=',SITE_NUM, 'FORCING ERROR'
+>      end if
+>    end do
+> 
+> !MPI finalize 
+>    Call MPI_FINALIZE(IERR)
+>    STOP
+> !ARAKIDA ADDED FOR MPI ***************************************************************************
+> 
+> END PROGRAM start_point
+> 
+> 
+> !ARAKIDA SEPARATED "start_point" TO "start_point" (MPI SETTINGS) AND "main_program" (ORIGIAL SEIB-DGVM AND DA)   
+> SUBROUTINE main_program(SITE_NUM)
+> 
+> !_____________ Set Variables
+> !Namespace
+>    USE data_structure
+>    USE spinin_data           !ARAKIDA ADDED FOR DA
+>    USE vegi_status_current1  !ARAKIDA ADDED FOR DA
+>    implicit none
+54c128,181
+<    
+---
+>    integer z              !for general usage ARAKIDA ADDED FOR DA
+> 
+> !ARAKIDA ADDED FOR DA *****************************************************************************
+>    integer, intent(IN)::SITE_NUM           !site number which is culculated now
+>    integer, parameter :: span = 4
+>    integer, parameter :: simdays = 1460    !365*dayear for real observation 
+>    integer, parameter :: osse = 0          !OSSE:1 REAL:0 (OSSE is not used for this experiment)
+>    integer, parameter :: realobspr = 1460  !observation period, 365*dayear for real observation
+>    real,parameter     :: pai = 3.1415927 
+>    real, allocatable, dimension(:) ::obsv_sigma
+>    real, allocatable, dimension(:) ::likelihood
+>    real, allocatable, dimension(:) ::likelihood2
+>    real, dimension(realobspr) :: sd
+>    real                       :: LAI, obs2
+>    real, dimension(simdays)   :: obs1, obs3
+>    integer                    :: n
+>    character                 :: filename*128
+>    integer ::ptl !PTL number
+>    integer::loop
+>    integer::daloop
+>    integer, allocatable, dimension(:) :: ptl_order1
+>    integer, allocatable, dimension(:) :: ptl_order2
+>    real :: min_lai
+>    logical :: da_flag
+>    real, allocatable, dimension(:) :: random_noise
+>    integer, parameter :: parameter_num=6
+>    real:: LAI_da
+>    character                 :: filename1*128
+>    character                 :: filename2*128
+>    character                 :: filename3*128
+>    character                 :: filename4*128
+>    character                 :: filename5*128
+>    character                 :: filename6*128
+>    character                 :: filename7*128
+>    character                 :: filename8*128
+>    character                 :: filename9*128
+>    character                 :: filename10*128
+>    character                 :: filename11*128
+>    character                 :: filename12*128
+>    character                 :: filename13*128
+>    character                 :: filename14*128
+> 
+> !file_number !ARAKIDA MOVED THIS CODE FROM "parameter.txt" 
+> File_no=(/&
+> 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, &
+> 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, &
+> 41, 42, 43, 44, 45/)
+> 
+> !_____________ Random Seed. ADDED BY S.SHIMA (ARAKIDA ET AL. 2017)
+>    call init_random_seed()
+> 
+> !ARAKIDA ADDED FOR DA *****************************************************************************
+> 
+> 
+58,61c185,195
+<    !Pasoh
+<     LAT    = 2.97  
+<     LON    = 102.3 
+<    
+---
+> 
+> 
+> !ARAKIDA CHANGED FOR DA ***************************************************************************
+> !!Pasoh
+> !   LAT    = 2.97
+> !   LON    = 102.3
+>    LAT    = XY(SITE_NUM, 1) 
+>    LON    = XY(SITE_NUM, 2)
+> !ARAKIDA CHANGED FOR DA ***************************************************************************
+> 
+> 
+64,78c198,658
+<    
+< !_____________ Read Parameters
+< !Read Parameter files
+<    open (1, file='parameter.txt', action='READ', status='OLD')
+<       read ( unit=1, nml=Control)       
+<       read ( unit=1, nml=PFT_type)      
+<       read ( unit=1, nml=Respiration)   
+<       read ( unit=1, nml=Turnover_n)    
+<       read ( unit=1, nml=Metabolic)     
+<       read ( unit=1, nml=Assimilation)  
+<       read ( unit=1, nml=Dynamics)      
+<       read ( unit=1, nml=Disturbance)   
+<       read ( unit=1, nml=Soil_resp)     
+<    close (1)
+<    
+---
+> 
+> 
+> !ARAKIDA ADDED FOR DA *****************************************************************************
+> !_____________ Data Assimilation settings 
+> !DA TIMEs !ARAKIDA MOVED THIS SETTING FROM "parameter.txt, Simulation_year" 
+>    Sim_years1 = 100    !spinup years  ** should be changed if the spin-up period is changed. **
+>    Sim_years2 = 4      !DA and noDA years  ** should be changed if the DA (or noDA) period  is changed. **
+> 
+> !DA FLAGs
+>    open (21, file="da.txt")
+>    read (21,*) seib_pf_switch
+>    close(21)
+> 
+>    !ARAKIDA MOVED THIS SETTING FROM "parameter.txt, Flag_spinup_read, Flag_spinup_write, and Flag_output_write" 
+>    !default: data assimilation 
+>    Flag_spinup_read=.true.
+>    Flag_spinup_write=.false.
+>    Flag_output_write =.true.
+>    Asim_span   = 4
+>   
+>    !spinup 
+>    if (seib_pf_switch==1) then
+>       Flag_spinup_read=.false.
+>       Flag_spinup_write=.true.
+>       Flag_output_write =.false.
+>       Asim_span   = 365*Sim_years1+1
+>    endif
+> 
+>    !without data assimilation 
+>    if (seib_pf_switch==2) then
+>       Flag_spinup_read=.true.
+>       Flag_spinup_write=.false.
+>       Flag_output_write =.true.
+>       Asim_span   = 365*Sim_years2
+> 
+>    endif
+>     
+>    da_flag=.false. 
+> 
+> !Particle number
+>    open ( 21, file="ptl.txt")
+>    read (21,*) num_ptl
+>    close(21)
+> 
+> !Parameter
+>    allocate(Parameterin(num_ptl,parameter_num))
+>    allocate(LAI_all(num_ptl))
+>    write(filename1, '("../",i6.6,"/Parameterin.txt")') SITE_NUM
+>    open (21, file=filename1, status='old') 
+>    read (21, '()')
+>    do i = 1, num_ptl
+>    read (21, *) Parameterin(i,1:parameter_num)
+>    end do
+>    close(21)
+> 
+> !Spin_in file
+>    allocate(spin(num_ptl))
+>    allocate(spin2(num_ptl))
+>    if (Flag_spinup_read) then
+>       write(filename2, '("../", i6.6,"/spinup_in.bin")') SITE_NUM
+>       open (41, file=filename2, form='unformatted', access='sequential') 
+>       do i = 1, num_ptl
+>        call spinup_in (File_no(21), i) 
+>       end do
+>    close (41)
+>    endif
+> 
+> !Spin_out file
+>    if ( Flag_spinup_write ) then
+>       write(filename3, '("../",i6.6,"/spinup_out.bin")') SITE_NUM
+>       open (42, file=filename3, form='unformatted', access='sequential') 
+>    endif
+> 
+> 
+> !Output file
+>    if (Flag_output_write) then
+>       write(filename4, '("../",i6.6,"/output.bin")') SITE_NUM
+>       open (43, file= filename4, form='unformatted', access='direct', recl=36*4, convert='little_endian')
+>    endif
+> 
+> !Parameter log file
+>    if (seib_pf_switch==3) then
+>       write(filename5, '("../",i6.6,"/parameterlog.bin")') SITE_NUM
+>       open (44, file= filename5, form='unformatted', access='direct', recl=parameter_num*4, convert='little_endian')
+>    endif
+> 
+> !ARAKIDA ADDED FOR DA *****************************************************************************
+> 
+> !ARAKIDA MOVED THIS CODE FROM "parameter.txt" TO REDUCE I/O ***************************************
+> !SOME PARAMETERS ARE CHANGED. SEE ARAKIDA ET AL. 2017 AND 2019 
+> !___________ Set parameters
+> 
+> !Control
+>    Max_loc = 30
+>    Depth   = 100
+>    STEP    = 0.1
+>    C_in_drymass = 0.5
+>    write(filename6, '("../",i6.6,"/forcingdata.txt")') SITE_NUM !ARAKIDA ADDED INSTEAD OF Fn_climate
+>    Fn_climate  = filename6
+>    Fn_location = '../data/land_prop.txt' 
+> 
+> !PFT_type
+>    Life_type=(/1, 1, 1, 1, 5, 5, 0, 0, 0, 0, 2, 0, 3, 4/)
+>    Phenology_type=(/0, 0, 0, 0, 0, 4, 0, 0, 3, 0, 1, 2, 5, 6/)
+> 
+> !Respiration
+>    RM=(/&
+>    0.100, 0.100, 0.100, 0.100, 0.100, 0.100, &
+>    0.100, 0.100, 0.100, &
+>    0.100, 0.100, 0.100, &
+>    0.100, 0.100/)
+>    RG_f=(/&
+>    1.56, 1.56, 1.56, 1.56, 1.56, 1.56, &
+>    1.56, 1.56, 1.56, &
+>    1.56, 1.56, 1.56, &
+>    1.50, 1.50/)
+>    RG_f_suck=(/&
+>    0.00, 0.00, 0.00, 0.00, 0.00, 0.00, &
+>    0.00, 0.00, 0.00, &
+>    0.00, 0.00, 0.00, &
+>    0.00, 0.00/) 
+>    RG_s=(/&
+>    1.68, 1.68, 1.68, 1.68, 1.68, 1.68, &
+>    1.68, 1.68, 1.68, &
+>    1.68, 1.68, 1.68/)
+>    RG_r=(/&
+>    1.34, 1.34, 1.34, 1.34, 1.34, 1.34,&
+>    1.34, 1.34, 1.34, &
+>    1.34, 1.34, 1.34, &
+>    1.34, 1.34/)
+>    RG_stock_in=1.07
+>    RG_stock_out=1.00 
+> 
+> !Turnover_n
+>    TO_f=(/&
+>    0.59, 0.59, 0.59, 0.59, 0.59, 1.59, &
+>    0.22, 0.38, 2.17, &
+>    0.22, 3.19, 2.00, &
+>    3.19, 0.50/)
+>    TO_s=(/&
+>    0.00, 0.00, 0.00, 0.00, 0.00, 0.00, &
+>    0.05, 0.05, 0.05, &
+>    0.05, 0.00, 0.00/)
+>    TO_r=(/&
+>    0.76, 0.76, 0.76, 0.76, 0.59, 1.59, &
+>    0.64, 0.64, 0.64, &
+>    0.42, 0.42, 0.47, &
+>    0.40, 0.77/) 
+> 
+> !Metabolic
+>    ALM1=(/&
+>    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, &
+>    4800.0, 4800.0, 14500.0, &
+>    6000.0, 0.0, 8500.0/) 
+>    ALM2=(/&
+>    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, &
+>    100.0, 200.0, 200.0, &
+>    100.0,   0.0, 200.0/)
+>    ALM3=(/&
+>    620000.0, 570000.0, 370000.0, 780000.0, 560000.0, 560000.0, &
+>    374000.0, 492000.0, 492000.0, &
+>    374000.0, 700000.0, 670000.0/)                              
+>    ALM4=(/&
+>    0.00, 0.00, 0.00, 0.00, 0.00, 0.00, &
+>    0.38, 0.38, 0.38, &
+>    0.20, 0.00, 0.00/)
+>    ALM5=(/&
+>    0.20, 0.20, 0.20, 0.20, 0.10, 0.10, &
+>    0.00, 0.00, 0.00, &
+>    0.00, 0.00, 0.00/)
+>    ALM6=(/&
+>    0.37, 0.28, 0.28, 0.28, 0.30, 0.30, &
+>    0.00, 0.00, 0.00, &
+>    0.00, 0.00, 0.00/)
+>    CD_max=(/&
+>    39.0, 16.5, 11.3,  6.0, 15.0, 15.0, &
+>    15.0, 15.0, 15.0, &
+>    10.0,  8.0, 8.0/)
+>    LA_max=(/&
+>    5.0,   5.0,  5.0,  5.0,  3.0,  3.0, &
+>    4.0,   4.0,  2.0, &
+>    2.0,   4.0,  4.0/)
+>    FR_ratio=(/&
+>    4.00, 4.00, 4.00, 4.00, 4.00, 1.50, &
+>    1.50, 1.50, 1.50, &
+>    1.50, 0.35, 0.88, &
+>    0.10, 0.10/)
+>    RootDepth=(/&
+>    5,    5,    5,    5,    5,    5,    &
+>    5,    5,    5, &
+>    5,    5,    5, &
+>    1,    1/)
+>    DBH_limit=(/&
+>    1.56, 0.66, 0.45, 0.24, 1.00, 1.00, &
+>    1.00, 1.00, 1.00, &
+>    1.00, 0.40, 0.60/)
+>    HGT_max=(/&
+>    68.0, 68.0, 54.0, 42.0, 60.0, 60.0, &
+>    43.0, 17.0, 37.0, &
+>    35.0, 31.7, 31.7/)
+>    HGT_s=(/&
+>    140.0, 100.0,  95.0, 95.0, 172.0, 172.0, &
+>    65.0,  154.3, 159.0, &
+>    130.0, 165.0, 165.0/)
+>    SLA=(/&
+>    0.010, 0.010, 0.010, 0.010, 0.010, 0.013, &
+>    0.004, 0.007, 0.015, &
+>    0.004, 0.010, 0.025, &
+>    0.020, 0.010/)
+>    PN_f=(/&
+>    0.016, 0.016, 0.016, 0.016, 0.016, 0.022, &
+>    0.012, 0.012, 0.022, &
+>    0.012, 0.016, 0.042, &
+>    0.027, 0.018/)
+>    PN_s=(/&
+>    0.00232, 0.00232, 0.00232, 0.00232, 0.00232, 0.00319, &
+>    0.00174, 0.00174, 0.00319, &
+>    0.00174, 0.00140, 0.00363/)
+>    PN_r=(/&
+>    0.01376, 0.01376, 0.01376, 0.01376, 0.01376, 0.01892, &
+>    0.01032, 0.01032, 0.01892, &
+>    0.01032, 0.01376, 0.0215 , &
+>    0.02322, 0.01548/)                              
+> 
+> !Assimilation
+>    Pmax=(/&
+>    9.4, 9.9, 26.0, 16.3, 8.1, 11.9, &
+>    9.0, 9.0, 12.0, &
+>    9.3, 15.0, 21.7, &
+>    9.0, 12.0/)
+>    EK0=(/ &
+>    0.50, 0.50, 0.50, 0.50, 0.50, 0.50, &
+>    0.50, 0.50, 0.50, &
+>    0.50, 0.50, 0.50, &
+>    0.50, 0.50/)
+>    Lue0=(/&
+>    0.100, 0.060, 0.060, 0.090, 0.050, 0.050, &
+>    0.050, 0.050, 0.050, &
+>    0.050, 0.041, 0.039, &
+>    0.050, 0.050/)
+>    Topt0=(/&
+>    27.5, 27.5, 27.5, 27.5, 27.5, 27.5, &
+>    25.0, 25.5, 22.5, &
+>    18.0, 21.0, 18.0, &
+>    15.0, 35.0/)
+>    Tmin=(/&
+>    2.0, 2.0, 2.0, 2.0, 2.0, 2.0, &
+>    0.0, 0.0, -4.0, &
+>    -4.0, -4.0, -4.0, &
+>    -1.0,  2.5/)
+>    Tmax=(/&
+>    47.5, 47.5, 47.5, 47.5, 47.5, 47.5, &
+>    45.0, 45.0, 42.5, &
+>    38.5, 38.0, 38.5, &
+>    45.0, 55.0/)
+>    GS_b1=(/&
+>    0.01, 0.01, 0.01, 0.01, 0.01, 0.01, &
+>    0.01, 0.01, 0.01, &
+>    0.01, 0.01, 0.01, &
+>    0.01, 0.01/)
+>    GS_b2=(/&
+>    5.0,  5.0,  5.0,  5.0,  3.0,  3.0, &
+>    5.0,  5.0,  5.0, &
+>    5.0,  5.0,  5.0, &
+>    5.0,  3.0/)
+>    GS_b3=(/&
+>    10.0, 10.0, 10.0, 10.0, 10.0, 10.0, &
+>    10.0, 10.0, 10.0, &
+>    10.0, 10.0, 10.0, &
+>    10.0, 10.0/)
+>    KM=(/&
+>    33.0, 33.0, 33.0, 33.0, 33.0, 33.0, &
+>    30.0, 30.0, 30.0, &
+>    30.0, 30.0, 35.0, &
+>    37.0, 10.0/)
+>    CO2cmp0=(/&
+>    50.0, 50.0, 50.0, 50.0, 50.0, 50.0, &
+>    50.0, 50.0, 50.0, &
+>    50.0, 50.0, 50.0, &
+>    50.0, 5.0/)                       
+> 
+> !Dynamics
+>    M1=(/&
+>    0.000, 0.000, 0.000, 0.000, 0.0135, 0.0135, &
+>    0.018, 0.008, 0.010, &
+>    0.013, 0.001, 0.045/)
+>    M2=(/&
+>    0.0, 0.0, 0.0, 0.0, 1.0, 1.0, &
+>    1.0, 1.0, 1.0, &
+>    1.2, 1.5, 1.0/)
+>    M4=(/&
+>    1.0, 1.0, 8.0, 1.0, 0.0, 0.0, &
+>    0.0, 0.0, 0.0, &
+>    0.0, 0.0, 0.0/)
+>    M5=(/&
+>    0.04, 0.04, 0.08, 0.04, 0.00, 0.00, &
+>    0.00, 0.00, 0.00, &
+>    0.00, 0.00, 0.00/)
+>    TC_min=(/&
+>    15.5, 15.5, 15.5, 15.5, 10.0, 10.0, &
+>    -2.0, 3.0, -17.0, &
+>    -32.5, -45.0, -40.0, &
+>    -45.0, 15.5/)
+>    Heat_sensitive=(/&
+>    0,  0,  0,  0,  0,  0, &
+>    0,  0,  0, &
+>    0,  0,  0/)                        
+>    Heat_base=23.0                                        
+>    P_establish=(/&
+>    0.020, 0.004, 0.048, 0.002, 0.020, 0.010, &
+>    0.040, 0.040, 0.013, &
+>    0.005, 0.013, 0.010/)
+>    TC_max=(/&
+>    1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0, &
+>    22.0, 18.8, 15.5, &
+>    -2.0, -2.0, -2.0, &
+>    15.5, 1000.0/)                                 
+>    GDD_min=(/&
+>    3000, 3000, 3000, 3000, 3000, 3000, &
+>    900,  1200, 1200, &
+>    600,   250,  340/)
+>    PAR_min=(/&
+>    20, 20, 200, 20, 20, 20, &
+>    0,   0,   0, &
+>    0, 350, 700/)
+>    DM_max=(/&
+>    6,   6,   6, 6,  4,  12, &
+>    6,   6,  12, &
+>    12, 12,  12/)
+>    AGE_max=(/&
+>    200, 200, 50, 200, 200, 200, &
+>    500, 500, 500, &
+>    500, 400, 100/)
+>    Est_scenario=1
+>    Est_year_change=50
+>    Est_pft_OnOff=(/&
+>    .false.,.false.,.false.,.false.,.false.,.false.,&
+>    .false.,.false.,.false.,&
+>    .false.,.true.,.false./)
+>    Est_frac_random=0.100
+> 
+> !Disturbance
+>    Fuel_min=200.0
+>    Moisture_extinction=(/&
+>    0.3, 0.3, 0.3, 0.3, 0.3, 0.3, &
+>    0.3, 0.3, 0.3, &
+>    0.3, 0.3, 0.3, &
+>    0.2,  0.2/)
+>    M3=(/&
+>    0.12, 0.12, 0.12, 0.12, 0.00, 0.00, &
+>    0.12, 0.50, 0.12, &
+>    0.12, 1.00, 0.12/)
+> 
+> !Soil_resp
+>    TO_litter= 0.300000000
+>    TO_fast  = 0.066666666
+>    TO_slow  = 0.001333333
+>    F_air    = 0.700
+>    F_inter  = 0.985
+>    F_resp   =(/&
+>    0.65, 0.65, 0.65, 0.65, 0.65, 0.65, &
+>    0.70,  0.70,  0.70, &
+>    0.70,  0.70,  0.70, &
+>    0.70,  0.70/)
+>    F_fast   =(/&
+>    0.65, 0.65, 0.65, 0.65, 0.65, 0.65, &
+>    0.70,  0.70,  0.70, &
+>    0.70,  0.70,  0.70, &
+>    0.70,  0.70/)
+> 
+> !+-+-+-+-+-+-+-+-+-+-+-+-+-  MEMO  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+> !********************************************************************
+> !Plant Functional Type assignated for each number (abbreviation)
+> ! 1: Tropical broad-leaved evergreen	(TrBE_1)
+> ! 2: Tropical broad-leaved evergreen	(TrBE_2)
+> ! 3: Tropical broad-leaved evergreen	(TrBE_3)
+> ! 4: Tropical broad-leaved evergreen	(TrBE_4)
+> ! 5: Tropical broad-leaved evergreen	(TrBE_5_Africa)
+> ! 6: Tropical broad-leaved raingreen	(TrBR_Africa)
+> !
+> ! 7: Temperate needle-leaved evergreen	(TeNE)
+> ! 8: Temperate broad-leaved evergreen	(TeBE)
+> ! 9: Temperate broad-leaved summergreen	(TeBS)
+> !
+> !10: Boreal needle-leaved evergreen	(BoNE)
+> !11: Boreal needle-leaved summergreen	(BoNS)
+> !12: Boreal broad-leaved summergreen	(BoBS)
+> !
+> !13: Temperate herbaceous(C3)		(TeH)
+> !14: Tropical herbaceous(C4)		(TrH)
+> !********************************************************************
+> !
+> !********************************************************************
+> !Phenology type
+> ! 0: evergreen            (TrBE, TeNE, TeBE, BoNE)
+> ! 1: boreal summer green needle leaf        (BoNS)
+> ! 2: cold deciduous broad-leaved-woods      (BoBS)
+> ! 3: temperate deciduous broad-leaved-woods (TeBS)
+> ! 4: water-controlling deciduous            (TrBR)
+> ! 5: C3 grass                                (TeH)
+> ! 6: C4 grass                                (TrH)
+> !********************************************************************
+> !
+> !********************************************************************
+> !Definition of Life_type
+> ! 0: Other woody plants
+> ! 1: Tropical evergreen trees in South-east Asia
+> ! 2: Larch
+> ! 3: C3 grass
+> ! 4: C4 grass
+> ! 5: Tropical evergreen/deciduous trees in Africa
+> !********************************************************************
+> !
+> !********************************************************************
+> !Biome code
+> !  0: Water
+> !  1: Polar desert
+> !  2: Arctic/Alpine-tundra
+> !  3: tropical evergreen forest
+> !  4: tropical deciduous forest
+> !  5: temperate conifer forest
+> !  6: temperate broad-leaved evergreen forest
+> !  7: temperate deciduous forest
+> !  8: boreal evergreen forest
+> !  9: boreal deciduous forest
+> ! 10: xeric woodland / scrub
+> ! 11: Grassland / steppe / Savanna
+> ! 12: Desert
+> !********************************************************************
+> !
+> !********************************************************************
+> !Definitions of establishment paramteter for "Est_scenario"
+> !   
+> !   0 -> no trees can establish
+> !   1 -> only specified woody PFTs can establish
+> !   2 -> every potentially establishable PFT have same chance of establishment
+> !   3 -> in proportion of existing biomass after specific year
+> !   4 -> in proportion of existing biomass after specific year,
+> !        while little portion of establishment was randomly selected
+> !        from all potentialy establishable PFTs
+> !********************************************************************
+> 
+> !ARAKIDA MOVED THIS CODE FROM "parameter.txt" TO REDUCE I/O ***************************************
+> 
+> !ARAKIDA DELATED THIS CODE TO REDUCE I/O **********************************************************
+> !!_____________ Read Parameters
+> !!Read Parameter files
+> !   open (1, file='parameter.txt', action='READ', status='OLD')
+> !      read ( unit=1, nml=Control)       
+> !      read ( unit=1, nml=PFT_type)      
+> !      read ( unit=1, nml=Respiration)   
+> !      read ( unit=1, nml=Turnover_n)    
+> !      read ( unit=1, nml=Metabolic)     
+> !      read ( unit=1, nml=Assimilation)  
+> !      read ( unit=1, nml=Dynamics)      
+> !      read ( unit=1, nml=Disturbance)   
+> !      read ( unit=1, nml=Soil_resp)     
+> !   close (1)
+> !ARAKIDA DELATED THIS CODE TO REDUCE I/O **********************************************************
+> 
+> 
+124,130c704,713
+<    do i=1, year_climate_max
+<    do j=1, Day_in_Year
+<       do k=1, 20
+<          tmp_soil(j,i,k) = (1.0-k/20)      * tmp_soil1(j,i) + (k/20)      * tmp_soil2(j,i)
+<       enddo
+<       do k=21, 30
+<          tmp_soil(j,i,k) = (1.0-(k-20)/10) * tmp_soil2(j,i) + ((k-20)/10) * tmp_soil3(j,i)
+---
+>    do i = 1, year_climate_max
+>       do j = 1, Day_in_Year
+>          do k = 1, 20
+>             !tmp_soil(j,i,k) = (1.0-k/20)      * tmp_soil1(j,i) + (k/20)      * tmp_soil2(j,i)
+>             tmp_soil(j, i, k) = (1.0 - real(k) / 20.0) * tmp_soil1(j, i) + (real(k) / 20.0) * tmp_soil2(j, i) !ARAKIDA ADDED "real"
+>          enddo
+>          do k = 21, 30
+>             !tmp_soil(j,i,k) = (1.0-(k-20)/10) * tmp_soil2(j,i) + ((k-20)/10) * tmp_soil3(j,i)
+>             tmp_soil(j, i, k) = (1.0 - (real(k) - 20.0) / 10.0) * tmp_soil2(j, i) + ((real(k) - 20.0) / 10.0) * tmp_soil3(j, i) !ARAKIDA ADDED "real"
+>          enddo
+133,134c716
+<    enddo
+<    
+---
+> 
+136c718
+<    Open (File_no(1), file='co2_1750-2100_a1b.txt', status='OLD')
+---
+>    Open (File_no(1), file='../data/co2_1750-2100_a1b.txt', status='OLD') !ARAKIDA CHANGED DIRECTORY
+141,172c723,757
+<    
+< !_____________ Display Simulation Conditions
+<    !Print location properties
+<    write (*,*)
+<    write (*,*) '*********  Coodinate Configurations  *********'
+<    write (*,*) 'Latitude, Longtitude   :', LAT, LON
+<    write (*,*) 'Point nomal            :', point
+<    write (*,*)
+<    
+<    !Print soil properties
+<    write (*,*) '*********  Location properties  *********'
+<    write (*,*) 'Altitude    :', ALT         
+<    write (*,*) 'Albedo_soil0:', Albedo_soil0
+<    write (*,*) 'W_sat       :', W_sat       
+<    write (*,*) 'W_fi        :', W_fi        
+<    write (*,*) 'W_wilt      :', W_wilt      
+<    write (*,*)                              
+<    
+<    !Print climate properties
+<    x = real(Day_in_Year * year_climate_max)
+<    
+<    write (*,*) '*********  Wether statistics (annual mean of the first year)  *********'
+<    write (*,*) '2m air temperature  (Cecius)  :', sum(tmp_air  (:,:)) / x
+<    write (*,*) 'soil temperature 1  (Cecius)  :', sum(tmp_soil1(:,:)) / x
+<    write (*,*) 'soil temperature 2  (Cecius)  :', sum(tmp_soil2(:,:)) / x
+<    write (*,*) 'soil temperature 3  (Cecius)  :', sum(tmp_soil3(:,:)) / x
+<    write (*,*) 'precipitation       (mm/year) :', sum(prec     (:,:)) / real(year_climate_max)
+<    write (*,*) 'cloud               (fraction):', sum(cloud    (:,:)) / x
+<    write (*,*) 'humidity            (kg/kg)   :', sum(humid    (:,:)) / x
+<    write (*,*) 'wind                (m/s)     :', sum(wind     (:,:)) / x
+<    write (*,*) 
+<   
+---
+> 
+> !ARAKIDA DELATED **********************************************************************************  
+> !!_____________ Display Simulation Conditions 
+> !   !Print location properties
+> !   write (*,*)
+> !   write (*,*) '*********  Coodinate Configurations  *********'
+> !   write (*,*) 'Latitude, Longtitude   :', LAT, LON
+> !   write (*,*) 'Point nomal            :', point
+> !   write (*,*)
+>    
+> !   !Print soil properties
+> !   write (*,*) '*********  Location properties  *********'
+> !   write (*,*) 'Altitude    :', ALT         
+> !   write (*,*) 'Albedo_soil0:', Albedo_soil0
+> !   write (*,*) 'W_sat       :', W_sat       
+> !   write (*,*) 'W_fi        :', W_fi        
+> !   write (*,*) 'W_wilt      :', W_wilt      
+> !   write (*,*)                              
+> !
+> !   !Print climate properties
+> !   x = real(Day_in_Year * year_climate_max)
+> !   
+> !   write (*,*) '*********  Wether statistics (annual mean of the first year)  *********'
+> !   write (*,*) '2m air temperature  (Cecius)  :', sum(tmp_air  (:,:)) / x
+> !   write (*,*) 'soil temperature 1  (Cecius)  :', sum(tmp_soil1(:,:)) / x
+> !   write (*,*) 'soil temperature 2  (Cecius)  :', sum(tmp_soil2(:,:)) / x
+> !   write (*,*) 'soil temperature 3  (Cecius)  :', sum(tmp_soil3(:,:)) / x
+> !   write (*,*) 'precipitation       (mm/year) :', sum(prec     (:,:)) / real(year_climate_max)
+> !   write (*,*) 'cloud               (fraction):', sum(cloud    (:,:)) / x
+> !   write (*,*) 'humidity            (kg/kg)   :', sum(humid    (:,:)) / x
+> !   write (*,*) 'wind                (m/s)     :', sum(wind     (:,:)) / x
+> !   write (*,*) 
+> 
+> !ARAKIDA DELATED ********************************************************************************** 
+> 
+178,187c763,961
+<       write (*,*) '*********  Now simulating  *********'
+<       Call main_loop ( &
+<       LAT, LON, year_climate_max, &
+<       tmp_air(:,:), tmp_soil1(:,:), tmp_soil2(:,:), tmp_soil3(:,:), &
+<       cloud(:,:), prec(:,:), humid(:,:), wind(:,:), aco2_1750to2100, &
+<       ALT, Albedo_soil0, W_fi, W_wilt, W_sat, W_mat )
+<       write (*,*) '*********  Done  *********'
+<    ENDIF
+<    
+<    STOP
+---
+> 
+> !ARAKIDA ADDED FOR DA (MAIN PART OF DA)************************************************************
+> !_____________ Without Data Assimilation
+>      IF (seib_pf_switch==1 .or. seib_pf_switch==2) then !spin-up or noDA
+>        daloop=1
+>        Do ptl = 1, num_ptl
+> !      write (*,*) '*********  Now simulating  *********' !ARAKIDA DELATED
+>         !ARAKIDA CHANGED ARGUMENTS FOR DA (ptl, ptl, da_flag, ptl are added, last ptl is dummy)
+>          Call main_loop ( &
+>          LAT, LON, year_climate_max, &
+>          tmp_air(:,:), tmp_soil1(:,:), tmp_soil2(:,:), tmp_soil3(:,:), &
+>          cloud(:,:), prec(:,:), humid(:,:), wind(:,:), aco2_1750to2100, &
+>          ALT, Albedo_soil0, W_fi, W_wilt, W_sat, W_mat, ptl, ptl, da_flag, ptl) 
+> !      write (*,*) '*********  Done  *********' !ARAKIDA DELATED
+>          Call spinup_out (File_no(22))
+>        End do
+>      ENDIF
+> 
+> !_____________ Data Assimilation
+>      IF (seib_pf_switch==3 ) then 
+>         !______Allocate particle number
+>          allocate(obsv_sigma(num_ptl))
+>          allocate(likelihood(num_ptl))
+>          allocate(likelihood2(num_ptl))
+>          allocate(ptl_order1(num_ptl))
+>          allocate(ptl_order2(num_ptl))
+>          allocate(noise_list(num_ptl))
+>          allocate(random_noise(num_ptl))
+>          
+>         !______Observation pointer (OSSE is not used for this experiment)
+>          !if (osse == 1) then
+>          !  days=365*Sim_years1+Asim_span+1
+>          !else 
+>            days=Asim_span+1
+>          !endif 
+> 
+>         !______MODIS sd
+>          write(filename7, '("../",i6.6,"/sd_lai.txt")') SITE_NUM
+>          open (21,file =  filename7, status="old") 
+>          read (21, *) sd
+>          close(21)
+>         !______obs
+>          write(filename8, '("../",i6.6,"/obs_lai.txt")') SITE_NUM
+>          open (21, file = filename8, status="old")
+>          read (21, *) obs1
+>          close(21)     
+>         !______daloop
+>          open (21, file="daloop.txt")
+>          read (21,*) daloop
+>          close(21)
+>         !______normal ptl order
+>          do i=1, num_ptl
+>            ptl_order1(i)=i
+>          end do
+> 
+>          da_flag=.false.
+>          daout_counter=1
+> 
+> !______DA_LOOP
+>          Do loop = 1, daloop      
+>            !______time counter
+>            if (MOD(days,365)==0) then 
+>              days = days + 1
+>            endif
+> 
+>            min_lai = 0.5 !minimum LAI for DA     
+> 
+>            IF (da_flag==.true. .and. days>(Asim_span+1)) then   
+>            
+>              !______read parameter
+>              open (21, file=filename1, status='old') 
+>              read (21, '()')
+>              do i = 1, num_ptl
+>                read (21, *) Parameterin(i,1:parameter_num)
+>              end do
+>              close(21)
+>            
+>              !______read ptl order
+>              write(filename9, '("../",i6.6,"/sampled_id_list.txt")') SITE_NUM
+>              open (21, file=filename9, status='old')
+>              read (21, *) ptl_order2
+>              close(21)
+> 
+>              !______add random noise to variables !this is not used for this experiment
+>              write(filename13, '("../",i6.6,"/noise_list.txt")') SITE_NUM
+>              open (21, file=filename13, status='old')
+>              read (21, *) noise_list
+>              close(21)
+>              do i = 1, num_ptl 
+>                random_noise(i) = randf()  
+>              end do
+>              random_noise = random_noise - (sum(random_noise)/num_ptl) 
+>              random_noise = 0.0 ! ** comment out this if random_noise to variables is used **
+> 
+>            ELSE
+>              ptl_order2=ptl_order1
+>            ENDIF
+> 
+>            !______PTL_LOOP
+>            Do ptl = 1, num_ptl    
+>              !______parameter log
+>              z=num_ptl*(loop-1) + ptl
+>              write(44, rec=z) Parameterin(ptl,1:parameter_num)
+> 
+>  !           write (*,*) '*********  Now simulating  *********' !ARAKIDA DELATED
+>              !ARAKIDA CHANGED ARGUMENTS FOR DA (ptl_order2(ptl), ptl, da_flag, random_noise(ptl) are added)
+>              Call main_loop ( &
+>              LAT, LON, year_climate_max, &
+>              tmp_air(:,:), tmp_soil1(:,:), tmp_soil2(:,:), tmp_soil3(:,:), &
+>              cloud(:,:), prec(:,:), humid(:,:), wind(:,:), aco2_1750to2100, &
+>              ALT, Albedo_soil0, W_fi, W_wilt, W_sat, W_mat, ptl_order2(ptl), ptl, da_flag, random_noise(ptl))
+> !            write (*,*) '*********  Done  *********' !ARAKIDA DELATED
+>              Call spinup_out_allocate (ptl)
+>            
+>              !Write LAI for PF
+>              lai_DA=0
+>              Do i=1, PFT_no
+>                lai_DA = lai_DA + lainow(i)
+>              end do 
+>                LAI_all(ptl)=lai_DA 
+>            End do 
+> 
+>            spin=spin2
+> 
+>            IF (obs1(days) >= min_lai) then
+> 
+>            !______sd (OSSE is not used for this experiment)
+>              !if (osse == 1) then  
+>              !  obsv_sigma = LAI_all * 0.1 
+>              !else
+>                obsv_sigma(1:num_ptl) = sd(days) 
+>              !end if
+> 
+>            !______obs
+>                obs2 = obs1(days)
+> 
+>            !______ calculate likelihood
+>                do i = 1, num_ptl
+>                  if (obsv_sigma(i) < 0.5) then
+>                    obsv_sigma(i) =0.5
+>                  end if
+> 
+>                  if (obs2 == 0 .or. obsv_sigma(i) == 0.0 .or. obsv_sigma(i) == -9999.0) then
+>                    likelihood(i) = 0.0
+>                  else
+>                    likelihood(i) = exp(-(LAI_all(i) - obs2) ** 2 * 0.5 / obsv_sigma(i) / obsv_sigma(i)) / sqrt(2 * pai * obsv_sigma(i) * obsv_sigma(i))
+>                  end if
+>                enddo
+> 
+>            !______ normarization
+>                x = sum(likelihood)
+>                likelihood(1:num_ptl) = likelihood(1:num_ptl) / x
+>                IF (obs1(days) >= 0.5) then
+>                  da_flag=.true.
+>          
+>            !_______ output likelihood
+>                  write(filename12, '("../",i6.6,"/likelihood.txt")') SITE_NUM
+>                  open (21, file = filename12, status="replace")
+>                  do i = 1, num_ptl
+>                    write(21, *) likelihood(i) 
+>                  enddo
+>                  close(21)     
+>       
+>            !______ resampling 
+>                  write(filename10, '("sh ", "../",i6.6,"/R_resample.sh")') SITE_NUM
+>                  CALL system(filename10)       
+> 
+>                ELSE
+>                  da_flag=.false.
+>                END IF   !obs1(days) >= 0.5
+> 
+>            ELSE
+>              da_flag=.false.
+>            ENDIF        !obs1(days) >= min_lai
+> 
+>            days = days + span
+> 
+>          END DO        !loop = 1, daloop
+> 
+>      ENDIF             !seib_pf_switch==3  
+>  
+>    ENDIF               !Mask==0 .or. Albedo_soil0<=0.0 .or. W_sat<=0.0 .or. W_fi<=0.0 .or. W_wilt<=0.0
+> 
+> 
+>    if ( Flag_spinup_write ) then
+>      close (42) 
+>    endif
+>    if (Flag_output_write) then
+>      close (43)   
+>    endif
+>    if (seib_pf_switch==3) then
+>      close (44)
+>    endif
+> !ARAKIDA ADDED FOR DA (MAIN PART OF DA)************************************************************
+> 
+> END SUBROUTINE main_program
+> 
+> !END Program main_program
+> 
+189c963
+< END PROGRAM start_point
+---
+> 
