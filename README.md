@@ -5,8 +5,8 @@ Data assimilation code for SEIB-DGVM, developed by Hazuki Arakida (RIKEN) and Sh
 - MAIN CODE<br>
   - seib271_pf200/scr/diff.txt<br>
     Modifications to SEIB-DGVM2.71.<br>
-    Put the modificated SEIB-DGVM code in this directory.<br>
     Original SEIB-DGVM code is available at http://seib-dgvm.com/.<br>
+    Put the modificated SEIB-DGVM code in this directory.<br>   
     Main program: start_point.f90<br>
              
   - seib271_pf200/R_pf.R, seib271-pf200/R_resample.sh<br>
