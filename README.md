@@ -1,7 +1,7 @@
-# seib-dgvm-pf
+# seib-pf
 Data assimilation code for SEIB-DGVM, developed by Hazuki Arakida (RIKEN) and Shin-Ichiro Shima (University of Hyogo, RIKEN).
 
-<ver.2>
+##### seib271_pf200 (particle filter ver.2) #####
 - Main code<br>
   - seib271_pf200/scr/diff.txt<br>
     Modifications to SEIB-DGVM2.71.<br>
